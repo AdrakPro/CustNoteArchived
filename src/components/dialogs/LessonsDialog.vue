@@ -9,7 +9,7 @@
       :lesson-title="lesson.lessonTitle"
       :menu-items="createMenuItems(lesson.lessonTitle)"
       :is-redirecting-disabled="true"
-      @submitLessonTitleInput="submitLessonTitleInput"
+      @submitLessonTitle="submitLessonTitle"
     />
     <q-card class="lesson-card">
       <q-icon
@@ -52,6 +52,7 @@ export default {
   },
 
   methods: {
+    /* Check if other lessons haven't got any null titles, then persist a dummy object, which will trigger submitLessonTitle */
     createLesson() {
       if (!this.api.isObjectHasNullField('lessonTitle')) {
         this.$store.dispatch('sectionStore/disableMenu');
@@ -67,7 +68,8 @@ export default {
       }
     },
 
-    submitLessonTitleInput(lessonTitleInputValue) {
+    /* Triggers when q-input condition is true, validate input, persist to store and db, delete when input is not unique */
+    submitLessonTitle(lessonTitleInputValue) {
       const lessonKey = this.getLessonKey(this.getLessonIndex(null));
 
       if (this.api.validateInput(lessonTitleInputValue, (lesson) => lesson.lessonTitle === lessonTitleInputValue)) {
@@ -102,6 +104,7 @@ export default {
       this.rerenderLessons();
     },
 
+    /* Delete lesson from store and db using it's key */
     deleteLesson(lessonKey) {
       this.db.updateNestedFields(this.dialogTitle, (oldData) => {
         delete oldData.lessons[lessonKey];
@@ -113,6 +116,7 @@ export default {
       });
     },
 
+    /* Set lessonTitle to null, triggering submitLessonTitle */
     renameLesson(lessonKey) {
       this.$store.dispatch('sectionStore/disableMenu');
       this.$store.dispatch('sectionStore/setPreviousTitle', this.lessons[lessonKey].lessonTitle);
@@ -130,6 +134,7 @@ export default {
       if (this.api.isObjectHasNullField('lessonTitle')) {
         const lessonKey = this.getLessonKey(this.getLessonIndex(null));
         this.deleteLesson(lessonKey);
+        this.$store.dispatch('sectionStore/enableMenu');
       }
     },
 

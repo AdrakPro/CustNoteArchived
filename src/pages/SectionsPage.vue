@@ -47,6 +47,7 @@ export default {
   },
 
   methods: {
+    /* Check if other sections haven't got any null titles, then persist a dummy object, which will trigger submitSectionTitle */
     createSection() {
       if (!this.api.isObjectHasNullField('sectionTitle')) {
         this.$store.dispatch('sectionStore/disableMenu');
@@ -63,6 +64,7 @@ export default {
       }
     },
 
+    /* Increase div index to force rerender */
     rerenderSections() {
       this.sectionsDivIndex += 1;
     },

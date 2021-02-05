@@ -7,7 +7,7 @@
       <div v-if="lessonTitle === null">
         <q-input
           v-model="lessonTitleInput"
-          @keydown.enter="submitLessonTitleInput"
+          @keydown.enter="submitLessonTitle"
           class="lesson-input"
           style="padding: 3vh 1vh 0 1vh"
           autofocus
@@ -39,17 +39,19 @@ export default {
   },
 
   methods: {
+    /* If redirecting is not disabled, redirect to LessonPage.vue with lessonTitle param */
     redirectToNotes(lessonTitle) {
       if (!this.isRedirectingDisabled) {
         this.$router.push({
-          name: 'notes',
+          name: 'lesson',
           params: { lessonTitle },
         });
       }
     },
 
-    submitLessonTitleInput() {
-      this.$emit('submitLessonTitleInput', this.lessonTitleInput);
+    /* Emit submitLessonTitle event with input value param */
+    submitLessonTitle() {
+      this.$emit('submitLessonTitle', this.lessonTitleInput);
     },
   },
 

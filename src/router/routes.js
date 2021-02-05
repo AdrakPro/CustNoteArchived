@@ -7,13 +7,13 @@ const routes = [
     ],
   },
   {
-    path: '/notes/',
+    path: '/lesson/',
     component: () => import('layouts/MainLayout'),
     children: [
       {
-        path: '/notes/:lessonTitle',
-        name: 'notes',
-        component: () => import('pages/NotesPage'),
+        path: '/lesson/:lessonTitle',
+        name: 'lesson',
+        component: () => import('pages/LessonPage'),
         props: true,
       },
     ],

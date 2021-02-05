@@ -24,8 +24,12 @@ import { mapState } from 'vuex';
 export default {
   name: 'Menu',
 
+  created() {
+    console.log(this.isMenuDisabled);
+  },
+
   computed: {
-    ...mapState({
+    ...mapState('sectionStore', {
       isMenuDisabled: (state) => state.isMenuDisabled,
     }),
   },

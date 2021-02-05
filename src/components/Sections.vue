@@ -5,7 +5,7 @@
         v-if="sectionTitle === null"
         class="section-title__input"
         v-model="sectionTitleInput"
-        @keydown.enter="submitSectionTitleInput"
+        @keydown.enter="submitSectionTitle"
         autofocus
         borderless
       />
@@ -57,11 +57,13 @@ export default {
   },
 
   created() {
+    /* Create database object using it's collection name and primary key name */
     this.db = new DatabaseApi(SECTIONS_NAME, SECTIONS_PRIMARY_KEY);
   },
 
   methods: {
-    submitSectionTitleInput() {
+    /* Triggers when q-input condition is true, validate input, persist to store and db, delete when input is not unique */
+    submitSectionTitle() {
       const sectionKey = this.getSectionKey(this.getSectionIndex(null));
 
       if (this.api.validateInput(this.sectionTitleInput, (section) => section.sectionTitle === this.sectionTitleInput)) {
@@ -92,6 +94,7 @@ export default {
       this.rerenderSections();
     },
 
+    /* Delete section from store and db using it's key */
     deleteSection(sectionKey) {
       this.db.deleteDoc(sectionKey);
       this.$store.dispatch('sectionStore/deleteSection', sectionKey);
@@ -99,6 +102,7 @@ export default {
       this.rerenderSections();
     },
 
+    /* Set sectionTitle to null, triggering submitSectionTitle */
     renameSection(sectionKey) {
       this.$store.dispatch('sectionStore/disableMenu');
       this.$store.dispatch('sectionStore/setPreviousTitle', this.sections[sectionKey].sectionTitle);
@@ -108,6 +112,11 @@ export default {
       });
 
       this.rerenderSections();
+    },
+
+    /* Emit rerenderSections event which increases key index, forcing rerender  */
+    rerenderSections() {
+      this.$emit('rerenderSections');
     },
 
     createMenuItems(sectionTitle) {
@@ -125,10 +134,6 @@ export default {
           executeFuncParams: [sectionKey],
         },
       ];
-    },
-
-    rerenderSections() {
-      this.$emit('rerenderSections');
     },
 
     getSectionIndex(sectionTitle) {

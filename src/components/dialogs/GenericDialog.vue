@@ -30,14 +30,14 @@ export default {
   name: 'GenericDialog',
 
   methods: {
-    /* Emit closeDialog function to parent component */
+    /* Emit closeDialog to parent component */
     closeDialog() {
       this.$emit('closeDialog');
     },
   },
 
   computed: {
-    /* Get dynamically imported module based on componentName prop /> */
+    /* Get dynamically imported component based on componentName prop /> */
     contentDialogComponent() {
       return () => import(`components/dialogs/${this.contentComponentName}`);
     },
