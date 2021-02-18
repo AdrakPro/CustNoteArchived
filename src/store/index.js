@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 import sectionStore from './sectionStore';
+import menuStore from './menuStore';
 
 Vue.use(Vuex);
 
@@ -18,6 +19,7 @@ export default function (/* { ssrContext } */) {
   return new Vuex.Store({
     modules: {
       sectionStore,
+      menuStore,
     },
 
     // enable strict mode (adds overhead!)

@@ -1,26 +1,22 @@
 <template>
   <div>
-    <q-card
-      class="lesson-card"
-      flat
-    >
-      <div v-if="lessonTitle === null">
+    <q-card class="lesson-card">
+      <div v-if="lesson.lessonTitle === null">
         <q-input
           v-model="lessonTitleInput"
           @keydown.enter="submitLessonTitle"
-          class="lesson-input"
-          style="padding: 3vh 1vh 0 1vh"
-          autofocus
+          style="padding: 2vh 1vh 0 1vh"
+          class="lesson-card__input"
           color="positive"
-          dense
+          autofocus
         />
       </div>
       <div
-        class="lesson-card__text"
-        @click="redirectToNotes(lessonTitle)"
         v-else
-      >{{ lessonTitle }}
-        <Menu :menu-items="this.menuItems" />
+        @click="redirectToNotes(lesson.lessonId)"
+        class="lesson-card__text"
+      >{{ lesson.lessonTitle }}
+        <Menu :menu-items="menuItems" />
       </div>
     </q-card>
   </div>
@@ -39,24 +35,24 @@ export default {
   },
 
   methods: {
-    /* If redirecting is not disabled, redirect to LessonPage.vue with lessonTitle param */
-    redirectToNotes(lessonTitle) {
+    /* If redirecting is not disabled, redirect to LessonPage.vue with lessonId param */
+    redirectToNotes(lessonId) {
       if (!this.isRedirectingDisabled) {
         this.$router.push({
           name: 'lesson',
-          params: { lessonTitle },
+          params: { lessonId },
         });
       }
     },
 
-    /* Emit submitLessonTitle event with input value param */
+    /* Emit submitLessonTitle with input value */
     submitLessonTitle() {
       this.$emit('submitLessonTitle', this.lessonTitleInput);
     },
   },
 
   props: {
-    lessonTitle: String,
+    lesson: Object,
     menuItems: Array,
     isRedirectingDisabled: {
       type: Boolean,
@@ -69,19 +65,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.lesson-card {
-  display: inline-block;
-  min-width: 150px;
-  max-width: 500px;
-  height: 110px;
-  margin: 15px;
-  border-radius: 15px;
-  border: 0.15rem solid #52D273;
-  background-color: #464646;
-  cursor: pointer;
-  user-select: none;
-}
-
 .lesson-card__text {
   padding: 15px 15px 0 15px;
   font-size: 54px;
@@ -89,9 +72,11 @@ export default {
   color: #52D273;
 }
 
-.lesson-input input {
+.lesson-card__input input {
+  height: 30px;
   text-align: center;
-  font-size: 20px;
-  color: #e8e6e3;
+  font-size: 40px;
+  font-weight: bold;
+  color: #52D273;
 }
 </style>

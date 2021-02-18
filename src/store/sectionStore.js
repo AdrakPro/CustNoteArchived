@@ -1,65 +1,53 @@
 import Vue from 'vue';
+import normalizeData, { SECTIONS_SCHEME } from 'components/utils/dataNormalizer';
 
 const state = {
   previousTitle: null,
-  isMenuDisabled: false,
   sections: {},
+  lessons: {},
 };
 
 const getters = {
-  getLessonsBy: (state) => (sectionTitle) => Object.values(state.sections)
-    .find((section) => section.sectionTitle === sectionTitle).lessons,
-
-  getSectionKeyBy: (state) => (sectionTitle) => Number.parseInt(Object.keys(state.sections)[
-    Object.values(state.sections).findIndex((section) => section.sectionTitle === sectionTitle)
-  ], 10),
+  getSectionLessonsBy: (state) => (sectionTitle) => state.sections[sectionTitle].lessons,
 };
 
 const actions = {
   fetchSections({ commit }, payload) {
     payload.then((docs) => {
-      const docsArray = [];
+      const dataToNormalize = [];
       for (let i = 0, l = docs.length; i < l; ++i) {
-        docsArray.push({
+        dataToNormalize.push({
           sectionTitle: docs[i].sectionTitle,
           lessons: docs[i].lessons,
         });
       }
 
-      commit('FETCH_SECTIONS', docsArray);
+      commit('FETCH_SECTIONS', normalizeData(dataToNormalize, SECTIONS_SCHEME));
     });
   },
 
-  createEmptySection({ commit }, payload) {
-    commit('CREATE_EMPTY_SECTION', payload);
+  createEmptySection({ commit }) {
+    commit('CREATE_EMPTY_SECTION');
   },
 
-  setSectionTitle({ commit }, payload) {
-    commit('SET_SECTION_TITLE', payload);
+  setSection({ commit }, sectionTitle) {
+    commit('SET_SECTION', sectionTitle);
   },
 
-  deleteSection({ commit }, sectionKey) {
-    commit('DELETE_SECTION', sectionKey);
+  deleteSection({ commit }, sectionTitle) {
+    commit('DELETE_SECTION', sectionTitle);
   },
 
   createEmptyLesson({ commit }, payload) {
     commit('CREATE_EMPTY_LESSON', payload);
   },
 
-  setLessonTitle({ commit }, payload) {
-    commit('SET_LESSON_TITLE', payload);
+  setLesson({ commit }, payload) {
+    commit('SET_LESSON', payload);
   },
 
   deleteLesson({ commit }, payload) {
     commit('DELETE_LESSON', payload);
-  },
-
-  enableMenu({ commit }) {
-    commit('ENABLE_MENU');
-  },
-
-  disableMenu({ commit }) {
-    commit('DISABLE_MENU');
   },
 
   setPreviousTitle({ commit }, title) {
@@ -68,52 +56,73 @@ const actions = {
 };
 
 const mutations = {
-  FETCH_SECTIONS(state, sections) {
-    for (let i = 0, l = sections.length; i < l; ++i) {
-      Vue.set(state.sections, i, sections[i]);
+  FETCH_SECTIONS(state, data) {
+    const { sections, lessons } = data.entities;
+
+    if (sections !== undefined) {
+      state.sections = sections;
+    }
+
+    if (lessons !== undefined) {
+      state.lessons = lessons;
     }
   },
 
-  CREATE_EMPTY_SECTION(state, payload) {
-    const { sectionKey, section } = payload;
-
-    state.sections[sectionKey] = section;
+  CREATE_EMPTY_SECTION(state) {
+    state.sections.null = {
+      sectionTitle: null,
+      lessons: [],
+    };
   },
 
-  SET_SECTION_TITLE(state, payload) {
-    const { sectionKey, sectionTitle } = payload;
+  SET_SECTION(state, sectionTitle) {
+    const section = state.sections[state.previousTitle] || { lessons: [] };
+    section.sectionTitle = sectionTitle;
 
-    state.sections[sectionKey].sectionTitle = sectionTitle;
+    Vue.delete(state.sections, state.previousTitle);
+    Vue.set(state.sections, sectionTitle, section);
   },
 
-  DELETE_SECTION(state, sectionKey) {
-    Vue.delete(state.sections, sectionKey);
+  DELETE_SECTION(state, sectionTitle) {
+    const sectionLessons = state.sections[sectionTitle].lessons;
+
+    for (let i = 0, l = sectionLessons.length; i < l; ++i) {
+      Vue.delete(state.lessons, sectionLessons[i]);
+    }
+    Vue.delete(state.sections, sectionTitle);
   },
 
   CREATE_EMPTY_LESSON(state, payload) {
-    const { sectionKey, lessonKey, lesson } = payload;
+    const { sectionTitle, lessonId } = payload;
 
-    state.sections[sectionKey].lessons[lessonKey] = lesson;
+    console.log(state.sections[sectionTitle]);
+    state.sections[sectionTitle].lessons.push(null);
+    state.lessons.null = {
+      lessonTitle: null,
+      lessonId,
+    };
   },
 
-  SET_LESSON_TITLE(state, payload) {
-    const { sectionKey, lessonKey, lessonTitleValue } = payload;
+  SET_LESSON(state, payload) {
+    const { sectionTitle, lessonTitle } = payload;
 
-    state.sections[sectionKey].lessons[lessonKey].lessonTitle = lessonTitleValue;
+    const lesson = state.lessons[state.previousTitle] || {};
+    lesson.lessonTitle = lessonTitle;
+
+    const sectionLessons = state.sections[sectionTitle].lessons;
+    const lessonIndex = sectionLessons.findIndex((lessonTitle) => lessonTitle === state.previousTitle);
+    sectionLessons[lessonIndex] = lessonTitle;
+
+    Vue.delete(state.lessons, state.previousTitle);
+    Vue.set(state.lessons, lessonTitle, lesson);
   },
 
   DELETE_LESSON(state, payload) {
-    const { sectionKey, lessonKey } = payload;
+    const { sectionTitle, lessonTitle } = payload;
 
-    Vue.delete(state.sections[sectionKey].lessons, lessonKey);
-  },
-
-  ENABLE_MENU(state) {
-    state.isMenuDisabled = false;
-  },
-
-  DISABLE_MENU(state) {
-    state.isMenuDisabled = true;
+    const sectionLessons = state.sections[sectionTitle].lessons;
+    sectionLessons.splice(sectionLessons.indexOf(lessonTitle), 1);
+    Vue.delete(state.lessons, lessonTitle);
   },
 
   SET_PREVIOUS_TITLE(state, title) {

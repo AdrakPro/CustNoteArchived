@@ -12,17 +12,20 @@
 
 .q-input input {
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   color: #e8e6e3;
 }
 
-.q-menu {
-  background-color: #3f4040;
-}
-
-.q-item {
-  background-color: #3f4040;
-  color: #e8e6e3;
+.lesson-card {
+  display: inline-block;
+  min-width: 150px;
+  max-width: 500px;
+  height: 110px;
+  margin: 15px;
+  border-radius: 15px;
+  border: 0.15rem solid #52D273;
+  background-color: #464646;
+  cursor: pointer;
   user-select: none;
 }
 

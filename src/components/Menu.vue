@@ -1,19 +1,18 @@
 <template>
   <q-menu
     v-show="menuItems !== undefined"
-    fit
+    context-menu
     anchor="bottom left"
     self="top left"
-    context-menu
   >
     <q-item
       v-for="item in menuItems"
       :key="item.itemTitle"
       :disable="isMenuDisabled"
-      @click="item.executeFunc(...item.executeFuncParams)"
+      @click="item.executeFn(...item.executeFnParams)"
       clickable
-    >
-      <q-item-section>{{ item.itemTitle }}</q-item-section>
+      v-close-popup
+    ><div>{{ item.itemTitle }}</div>
     </q-item>
   </q-menu>
 </template>
@@ -24,12 +23,8 @@ import { mapState } from 'vuex';
 export default {
   name: 'Menu',
 
-  created() {
-    console.log(this.isMenuDisabled);
-  },
-
   computed: {
-    ...mapState('sectionStore', {
+    ...mapState('menuStore', {
       isMenuDisabled: (state) => state.isMenuDisabled,
     }),
   },
@@ -41,5 +36,22 @@ export default {
 </script>
 
 <style>
+.q-menu {
+  background-color: transparent;
+}
 
+.q-item {
+  display: table;
+  background-color: #484848;
+  width: 140px;
+  height: 40px;
+  color: #52D273;
+  user-select: none;
+}
+
+.q-item div {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 14px;
+}
 </style>

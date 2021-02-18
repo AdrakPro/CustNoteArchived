@@ -23,11 +23,44 @@ const sectionSchema = {
           lessonTitle: {
             type: 'string',
           },
-          modules: {
-            type: 'object',
-            properties: {
-              moduleTitle: {
-                type: 'string',
+          lessonId: {
+            type: 'string',
+          },
+        },
+      },
+    },
+  },
+};
+
+const moduleSchema = {
+  keyCompression: true,
+  version: 0,
+  type: 'object',
+  properties: {
+    lessonId: {
+      type: 'string',
+      primary: true,
+    },
+    modules: {
+      type: 'array',
+      default: [],
+      items: {
+        type: 'object',
+        properties: {
+          moduleTitle: {
+            type: 'string',
+          },
+          subjects: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                subjectTitle: {
+                  type: 'string',
+                },
+                content: {
+                  type: 'string',
+                },
               },
             },
           },
@@ -53,14 +86,20 @@ async function getDb() {
     eventReduce: true,
   });
 
-  const sectionsCollection = db.collection({
-    name: 'sections',
-    schema: sectionSchema,
-    autoMigrate: true,
+  await db.addCollections({
+    sections: {
+      schema: sectionSchema,
+      autoMigrate: true,
+    },
+    modules: {
+      schema: moduleSchema,
+      autoMigrate: true,
+    },
   });
 
   const collectionsMap = new Map();
-  collectionsMap.set('sections', sectionsCollection);
+  collectionsMap.set('sections', db.sections);
+  collectionsMap.set('modules', db.modules);
 
   return collectionsMap;
 }

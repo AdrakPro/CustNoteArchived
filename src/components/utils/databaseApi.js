@@ -1,6 +1,6 @@
 import getCollection from 'boot/database';
 
-class DatabaseApi {
+export default class DatabaseApi {
   constructor(collectionName, primaryKeyName) {
     this.collection = getCollection(collectionName);
     this.primaryKeyName = primaryKeyName;
@@ -29,18 +29,8 @@ class DatabaseApi {
   }
 
   async insertDoc(object) {
-    this.collection.then((collection) => collection.insert(object));
-  }
-
-  async updateNestedFields(keyValue, changeFn) {
-    await this.findDoc(keyValue).then((doc) => {
-      doc.atomicUpdate(changeFn);
-    });
-  }
-
-  async deleteNestedFields(keyValue, object) {
-    await this.findDoc(keyValue).then((doc) => {
-      doc.atomicPatch(object);
+    this.collection.then((collection) => {
+      collection.insert(object);
     });
   }
 
@@ -50,17 +40,30 @@ class DatabaseApi {
     });
   }
 
+  async atomicUpdate(keyValue, changeFn) {
+    await this.findDoc(keyValue).then((doc) => {
+      doc.atomicUpdate(changeFn);
+    });
+  }
+
   async deleteDoc(keyValue) {
-    await this.findDoc(keyValue).then((doc) => doc.remove());
+    await this.findDoc(keyValue).then((doc) => {
+      if (doc !== null) {
+        doc.remove();
+      }
+    });
   }
 }
 
-export default DatabaseApi;
+const SECTIONS_COLLECTION = 'sections';
+const MODULES_COLLECTION = 'modules';
 
-const SECTIONS_NAME = 'sections';
 const SECTIONS_PRIMARY_KEY = 'sectionTitle';
+const MODULES_PRIMARY_KEY = 'lessonId';
 
 export {
-  SECTIONS_NAME,
+  SECTIONS_COLLECTION,
+  MODULES_COLLECTION,
   SECTIONS_PRIMARY_KEY,
+  MODULES_PRIMARY_KEY,
 };

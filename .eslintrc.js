@@ -68,6 +68,7 @@ module.exports = {
     'no-console': 'off',
     'no-plusplus': 'off',
     'max-len': 'off',
+    'object-curly-newline': 'off',
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'

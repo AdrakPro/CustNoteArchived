@@ -4,7 +4,7 @@
       <q-btn-group class="full-height" spread unelevated>
         <q-btn
           class="tool-bar__button"
-          @click="$router.push('/')"
+          @click="redirectToHome()"
         >Notes</q-btn>
         <q-btn class="tool-bar__button">Articles</q-btn>
         <q-btn class="tool-bar__button">Exercises</q-btn>
@@ -20,7 +20,17 @@
 </template>
 
 <script>
+export default {
+  name: 'MainLayout',
 
+  methods: {
+    redirectToHome() {
+      if (this.$router.currentRoute.path !== '/') {
+        this.$router.push('/');
+      }
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

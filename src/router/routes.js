@@ -11,7 +11,7 @@ const routes = [
     component: () => import('layouts/MainLayout'),
     children: [
       {
-        path: '/lesson/:lessonTitle',
+        path: '/lesson/:lessonId',
         name: 'lesson',
         component: () => import('pages/LessonPage'),
         props: true,

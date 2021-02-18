@@ -6,13 +6,13 @@
     <div class="dialog">
       <q-bar>
         <q-space />
-        <div class="dialog-tile">{{ dialogTitle }}</div>
+        <div class=dialog__tile>{{ dialogTitle }}</div>
         <q-space />
         <q-icon
-          class="dialog-bar__close"
           @click="closeDialog"
-          name="close"
           v-close-popup
+          class="dialog__close"
+          name="close"
         />
       </q-bar>
       <div>
@@ -59,13 +59,13 @@ export default {
   background: #3f4040;
 }
 
-.dialog-tile {
+.dialog__tile {
   font-weight: bold;
   font-size: 20px;
   color: #52D273;
 }
 
-.dialog-bar__close {
+.dialog__close {
   font-size: 20px;
   cursor: pointer;
   color: #52D273;

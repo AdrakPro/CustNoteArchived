@@ -4,12 +4,10 @@
       class="full-width"
       :key="sectionsDivIndex"
     >
-      <Sections
+      <Section
         v-for="section in sections"
         :key="section.sectionTitle"
-        :section-title="section.sectionTitle"
-        :lessons="section.lessons"
-        :api="api"
+        :section="section"
         @rerenderSections="rerenderSections"
       />
     </div>
@@ -18,28 +16,25 @@
 
 <script>
 import { mapState } from 'vuex';
-import Api from 'components/utils/api';
-import KeyListener from 'components/utils/keyListener';
-import Sections from 'components/Sections';
+import KeyListener, { CTRL_S_KEY } from 'components/utils/keyListener';
+import Section from 'components/Section';
 
 export default {
   name: 'SectionsPage',
 
   data() {
     return {
-      sectionsDivIndex: 0,
       keyListener: null,
-      api: null,
+      sectionsDivIndex: 0,
     };
   },
 
   created() {
     this.keyListener = new KeyListener();
-    this.api = new Api(this.sections);
   },
 
   mounted() {
-    this.keyListener.addKeyListener('s', this.createSection, this);
+    this.keyListener.addKeyListener(CTRL_S_KEY, this.createSection, this);
   },
 
   beforeDestroy() {
@@ -47,19 +42,11 @@ export default {
   },
 
   methods: {
-    /* Check if other sections haven't got any null titles, then persist a dummy object, which will trigger submitSectionTitle */
+    /* If sections have not got null field, create dummy object to trigger q-input */
     createSection() {
-      if (!this.api.isObjectHasNullField('sectionTitle')) {
-        this.$store.dispatch('sectionStore/disableMenu');
-
-        this.$store.dispatch('sectionStore/createEmptySection', {
-          sectionKey: this.api.createUniqueKey(),
-          section: {
-            sectionTitle: null,
-            lessons: [],
-          },
-        });
-
+      if (!this.isSectionsHaveNullField()) {
+        this.$store.dispatch('menuStore/disableMenu');
+        this.$store.dispatch('sectionStore/createEmptySection');
         this.rerenderSections();
       }
     },
@@ -67,6 +54,10 @@ export default {
     /* Increase div index to force rerender */
     rerenderSections() {
       this.sectionsDivIndex += 1;
+    },
+
+    isSectionsHaveNullField() {
+      return Object.prototype.hasOwnProperty.call(this.sections, 'null');
     },
   },
 
@@ -76,6 +67,6 @@ export default {
     }),
   },
 
-  components: { Sections },
+  components: { Section },
 };
 </script>
