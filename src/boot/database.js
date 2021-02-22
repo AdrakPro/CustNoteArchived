@@ -32,7 +32,7 @@ const sectionSchema = {
   },
 };
 
-const moduleSchema = {
+const subjectSchema = {
   keyCompression: true,
   version: 0,
   type: 'object',
@@ -41,28 +41,17 @@ const moduleSchema = {
       type: 'string',
       primary: true,
     },
-    modules: {
+    subjects: {
       type: 'array',
       default: [],
       items: {
         type: 'object',
         properties: {
-          moduleTitle: {
+          subjectTitle: {
             type: 'string',
           },
-          subjects: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                subjectTitle: {
-                  type: 'string',
-                },
-                content: {
-                  type: 'string',
-                },
-              },
-            },
+          content: {
+            type: 'string',
           },
         },
       },
@@ -91,15 +80,15 @@ async function getDb() {
       schema: sectionSchema,
       autoMigrate: true,
     },
-    modules: {
-      schema: moduleSchema,
+    subjects: {
+      schema: subjectSchema,
       autoMigrate: true,
     },
   });
 
   const collectionsMap = new Map();
   collectionsMap.set('sections', db.sections);
-  collectionsMap.set('modules', db.modules);
+  collectionsMap.set('subjects', db.subjects);
 
   return collectionsMap;
 }

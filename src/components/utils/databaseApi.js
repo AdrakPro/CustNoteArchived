@@ -56,14 +56,14 @@ export default class DatabaseApi {
 }
 
 const SECTIONS = 'sections';
-const MODULES = 'modules';
+const SUBJECTS = 'subjects';
 
 const SECTIONS_PRIMARY_KEY = 'sectionTitle';
-const MODULES_PRIMARY_KEY = 'lessonId';
+const SUBJECTS_PRIMARY_KEY = 'lessonId';
 
 export {
   SECTIONS,
-  MODULES,
+  SUBJECTS,
   SECTIONS_PRIMARY_KEY,
-  MODULES_PRIMARY_KEY,
+  SUBJECTS_PRIMARY_KEY,
 };

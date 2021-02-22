@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import normalizeData, { SECTIONS_SCHEME } from 'components/utils/dataNormalizer';
+import normalizeData from 'components/utils/dataNormalizer';
 
 const state = {
   previousTitle: null,
@@ -22,7 +22,7 @@ const actions = {
         });
       }
 
-      commit('FETCH_SECTIONS', normalizeData(dataToNormalize, SECTIONS_SCHEME));
+      commit('FETCH_SECTIONS', normalizeData(dataToNormalize));
     });
   },
 
