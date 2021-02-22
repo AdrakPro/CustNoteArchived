@@ -55,15 +55,15 @@ export default class DatabaseApi {
   }
 }
 
-const SECTIONS_COLLECTION = 'sections';
-const MODULES_COLLECTION = 'modules';
+const SECTIONS = 'sections';
+const MODULES = 'modules';
 
 const SECTIONS_PRIMARY_KEY = 'sectionTitle';
 const MODULES_PRIMARY_KEY = 'lessonId';
 
 export {
-  SECTIONS_COLLECTION,
-  MODULES_COLLECTION,
+  SECTIONS,
+  MODULES,
   SECTIONS_PRIMARY_KEY,
   MODULES_PRIMARY_KEY,
 };

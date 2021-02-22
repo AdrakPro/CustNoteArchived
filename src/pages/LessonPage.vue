@@ -1,10 +1,14 @@
 <template>
-  <div>ELO</div>
+  <LessonTree></LessonTree>
 </template>
 
 <script>
+import LessonTree from 'components/LessonTree';
+
 export default {
-  name: 'NotesPage',
+  name: 'LessonPage',
+
+  components: { LessonTree },
 };
 </script>
 

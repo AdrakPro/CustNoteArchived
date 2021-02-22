@@ -69,10 +69,10 @@ const mutations = {
   },
 
   CREATE_EMPTY_SECTION(state) {
-    state.sections.null = {
+    Vue.set(state.sections, null, {
       sectionTitle: null,
       lessons: [],
-    };
+    });
   },
 
   SET_SECTION(state, sectionTitle) {
@@ -95,12 +95,11 @@ const mutations = {
   CREATE_EMPTY_LESSON(state, payload) {
     const { sectionTitle, lessonId } = payload;
 
-    console.log(state.sections[sectionTitle]);
     state.sections[sectionTitle].lessons.push(null);
-    state.lessons.null = {
+    Vue.set(state.lessons, null, {
       lessonTitle: null,
       lessonId,
-    };
+    });
   },
 
   SET_LESSON(state, payload) {

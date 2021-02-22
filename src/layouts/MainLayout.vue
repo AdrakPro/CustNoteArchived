@@ -5,7 +5,7 @@
         <q-btn
           class="tool-bar__button"
           @click="redirectToHome()"
-        >Notes</q-btn>
+        >Lessons</q-btn>
         <q-btn class="tool-bar__button">Articles</q-btn>
         <q-btn class="tool-bar__button">Exercises</q-btn>
         <q-btn class="tool-bar__button">Settings</q-btn>

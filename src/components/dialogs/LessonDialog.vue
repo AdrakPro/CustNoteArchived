@@ -1,8 +1,5 @@
 <template>
-  <div
-    :key="lessonsDivKey"
-    class="row wrap"
-  >
+  <div class="row wrap">
     <LessonCard
       v-for="lessonTitle in getSectionLessonsBy(this.sectionTitle)"
       :key="lessonTitle"
@@ -23,7 +20,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import DatabaseApi, { SECTIONS_COLLECTION, SECTIONS_PRIMARY_KEY } from 'components/utils/databaseApi';
+import DatabaseApi, { SECTIONS, SECTIONS_PRIMARY_KEY } from 'components/utils/databaseApi';
 import MenuItem from 'components/models/menuItem';
 import LessonCard from 'components/LessonCard';
 
@@ -33,12 +30,11 @@ export default {
   data() {
     return {
       sectionTitle: this.dialogTitle,
-      lessonsDivKey: 0,
     };
   },
 
   created() {
-    this.db = new DatabaseApi(SECTIONS_COLLECTION, SECTIONS_PRIMARY_KEY);
+    this.db = new DatabaseApi(SECTIONS, SECTIONS_PRIMARY_KEY);
   },
 
   beforeDestroy() {
@@ -54,8 +50,6 @@ export default {
           lessonId: this.generateLessonId(),
         });
         this.$store.dispatch('menuStore/disableMenu');
-
-        this.rerenderLessons();
       }
     },
 
@@ -74,6 +68,7 @@ export default {
         } else {
           await this.db.atomicUpdate(this.sectionTitle, (oldData) => {
             const previousLessonIndex = this.findLessonIndex(oldData.lessons, this.previousTitle);
+
             oldData.lessons[previousLessonIndex].lessonTitle = lessonTitle;
             return oldData;
           });
@@ -89,8 +84,6 @@ export default {
       }
 
       this.$store.dispatch('menuStore/enableMenu');
-
-      this.rerenderLessons();
     },
 
     /* Delete lesson from store and db using it's key */
@@ -98,6 +91,7 @@ export default {
       if (lessonTitle !== null) {
         this.db.atomicUpdate(this.sectionTitle, (oldData) => {
           const lessonIndex = this.findLessonIndex(oldData.lessons, lessonTitle);
+
           delete oldData.lessons[lessonIndex];
           return oldData;
         });
@@ -117,8 +111,6 @@ export default {
         lessonTitle: null,
       });
       this.$store.dispatch('menuStore/disableMenu');
-
-      this.rerenderLessons();
     },
 
     /* Check if the last lesson has null lessonTitle field, if so delete it */
@@ -140,8 +132,14 @@ export default {
       return inputValue !== '' && this.lessons[inputValue] === undefined;
     },
 
-    findLessonIndex(array, lessonTitle) {
-      return array.findIndex((lesson) => lesson.lessonTitle === lessonTitle);
+    findLessonIndex(lessons, lessonTitle) {
+      return lessons.findIndex((lesson) => {
+        if (lesson !== undefined) {
+          return lesson.lessonTitle === lessonTitle;
+        }
+
+        return false;
+      });
     },
 
     generateLessonId() {
@@ -150,10 +148,6 @@ export default {
 
     isLessonsHaveNullField() {
       return Object.prototype.hasOwnProperty.call(this.lessons, 'null');
-    },
-
-    rerenderLessons() {
-      this.lessonsDivKey += 1;
     },
   },
 

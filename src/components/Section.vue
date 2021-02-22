@@ -35,7 +35,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import DatabaseApi, { SECTIONS_COLLECTION, SECTIONS_PRIMARY_KEY } from 'components/utils/databaseApi';
+import DatabaseApi, { SECTIONS, SECTIONS_PRIMARY_KEY } from 'components/utils/databaseApi';
 import MenuItem from 'components/models/menuItem';
 import LessonCard from 'components/LessonCard';
 import Dialog from 'components/dialogs/GenericDialog';
@@ -53,22 +53,22 @@ export default {
   },
 
   created() {
-    this.db = new DatabaseApi(SECTIONS_COLLECTION, SECTIONS_PRIMARY_KEY);
+    this.db = new DatabaseApi(SECTIONS, SECTIONS_PRIMARY_KEY);
   },
 
   methods: {
     /* Triggers when enter is pressed on q-input, validate input, persist data to store and db */
     async submitSectionTitle() {
       if (this.validateInput()) {
+        const sectionTitle = {
+          sectionTitle: this.sectionTitleInput,
+        };
+
         if (this.previousTitle === null) {
-          await this.db.insertDoc({
-            sectionTitle: this.sectionTitleInput,
-          });
+          await this.db.insertDoc(sectionTitle);
         } else {
           await this.db.updateDoc(this.previousTitle, {
-            $set: {
-              sectionTitle: this.sectionTitleInput,
-            },
+            $set: sectionTitle,
           });
         }
 
@@ -79,8 +79,6 @@ export default {
       }
 
       this.$store.dispatch('menuStore/enableMenu');
-
-      this.rerenderSections();
     },
 
     /* Delete section from store and db using it's key */
@@ -89,8 +87,6 @@ export default {
 
       this.db.deleteDoc(sectionTitle);
       this.$store.dispatch('sectionStore/deleteSection', sectionTitle);
-
-      this.rerenderSections();
     },
 
     /* Set sectionTittle to null, triggering submitSectionTitle */
@@ -98,13 +94,6 @@ export default {
       this.$store.dispatch('sectionStore/setPreviousTitle', this.section.sectionTitle);
       this.$store.dispatch('sectionStore/setSection', null);
       this.$store.dispatch('menuStore/disableMenu');
-
-      this.rerenderSections();
-    },
-
-    /* Emit rerenderSections event which increases key index, forcing rerender  */
-    rerenderSections() {
-      this.$emit('rerenderSections');
     },
 
     validateInput() {

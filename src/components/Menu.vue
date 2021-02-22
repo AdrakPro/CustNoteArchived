@@ -4,6 +4,7 @@
     context-menu
     anchor="bottom left"
     self="top left"
+    auto-close
   >
     <q-item
       v-for="item in menuItems"
@@ -11,7 +12,6 @@
       :disable="isMenuDisabled"
       @click="item.executeFn(...item.executeFnParams)"
       clickable
-      v-close-popup
     ><div>{{ item.itemTitle }}</div>
     </q-item>
   </q-menu>
@@ -43,8 +43,7 @@ export default {
 .q-item {
   display: table;
   background-color: #484848;
-  width: 140px;
-  height: 40px;
+  width: 130px;
   color: #52D273;
   user-select: none;
 }

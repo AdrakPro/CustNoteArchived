@@ -1,14 +1,10 @@
 <template>
   <q-page class="row">
-    <div
-      class="full-width"
-      :key="sectionsDivIndex"
-    >
+    <div class="full-width">
       <Section
         v-for="section in sections"
         :key="section.sectionTitle"
         :section="section"
-        @rerenderSections="rerenderSections"
       />
     </div>
   </q-page>
@@ -25,7 +21,6 @@ export default {
   data() {
     return {
       keyListener: null,
-      sectionsDivIndex: 0,
     };
   },
 
@@ -47,13 +42,7 @@ export default {
       if (!this.isSectionsHaveNullField()) {
         this.$store.dispatch('menuStore/disableMenu');
         this.$store.dispatch('sectionStore/createEmptySection');
-        this.rerenderSections();
       }
-    },
-
-    /* Increase div index to force rerender */
-    rerenderSections() {
-      this.sectionsDivIndex += 1;
     },
 
     isSectionsHaveNullField() {

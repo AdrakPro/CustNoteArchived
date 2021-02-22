@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="lesson !== undefined">
     <q-card class="lesson-card">
       <div v-if="lesson.lessonTitle === null">
         <q-input
