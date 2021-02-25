@@ -131,7 +131,13 @@ export default {
     selectNode(nodeLabel) {
       if (nodeLabel !== null) {
         this.selectedNodeTitle = nodeLabel;
+        this.emitSubjectToNoteEditor();
       }
+    },
+
+    emitSubjectToNoteEditor() {
+      const { label, content } = this.$refs.tree.getNodeByKey(this.selectedNodeTitle);
+      this.$emit('emitSubjectToNoteEditor', { subjectTitle: label, content });
     },
 
     filterNodes(node, filter) {
