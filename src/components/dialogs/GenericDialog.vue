@@ -12,7 +12,7 @@
           @click="closeDialog"
           v-close-popup
           class="dialog__close"
-          name="close"
+          name="mdi-close"
         />
       </q-bar>
       <div>

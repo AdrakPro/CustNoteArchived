@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 
 import sectionStore from './sectionStore';
 import menuStore from './menuStore';
+import editorStore from './editorStore';
 
 Vue.use(Vuex);
 
@@ -19,6 +20,7 @@ export default function (/* { ssrContext } */) {
   return new Vuex.Store({
     modules: {
       sectionStore,
+      editorStore,
       menuStore,
     },
 

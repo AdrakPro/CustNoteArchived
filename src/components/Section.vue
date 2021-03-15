@@ -1,6 +1,6 @@
 <template>
   <div class="section">
-    <div class="section__header">
+    <div class="section-header">
       <q-input
         v-if="section.sectionTitle === null"
         v-model="sectionTitleInput"
@@ -12,7 +12,7 @@
       <div
         v-else
         @click="openDialog"
-        class="section__header__text"
+        class="section-header__text"
       >{{ section.sectionTitle }}
         <Menu :menu-items="createMenuItems" />
       </div>
@@ -58,16 +58,16 @@ export default {
 
   methods: {
     /* Triggers when enter is pressed on q-input, validate input, persist data to store and db */
-    async submitSectionTitle() {
+    submitSectionTitle() {
       if (this.validateInput()) {
         const sectionTitle = {
           sectionTitle: this.sectionTitleInput,
         };
 
         if (this.previousTitle === null) {
-          await this.db.insertDoc(sectionTitle);
+          this.db.insertDoc(sectionTitle);
         } else {
-          await this.db.updateDoc(this.previousTitle, {
+          this.db.updateDoc(this.previousTitle, {
             $set: sectionTitle,
           });
         }
@@ -137,7 +137,7 @@ export default {
   margin-bottom: 2vh;
 }
 
-.section__header {
+.section-header {
   text-align: center;
   height: 30px;
   width: 100%;
@@ -146,7 +146,7 @@ export default {
   background-color: #434c43;
 }
 
-.section__header__text {
+.section-header__text {
   margin: 0;
   padding-top: 2px;
   text-align: center;

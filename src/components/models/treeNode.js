@@ -3,6 +3,6 @@ export default class TreeNode {
     this.label = label;
     this.id = id;
     this.content = content;
-    this.style = 'module-node';
+    this.style = 'subject-node';
   }
 }

@@ -39,18 +39,4 @@ export default {
 .q-menu {
   background-color: transparent;
 }
-
-.q-item {
-  display: table;
-  background-color: #484848;
-  width: 130px;
-  color: #52D273;
-  user-select: none;
-}
-
-.q-item div {
-  display: table-cell;
-  vertical-align: middle;
-  font-size: 14px;
-}
 </style>

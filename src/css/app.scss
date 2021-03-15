@@ -2,18 +2,32 @@
   font-family: 'WebFont';
   font-style: normal;
   font-weight: normal;
-  src: local('WebFont'), url('../assets/fonts/WebFont.woff') format('woff');
+  src: local('Webfont'), url('../assets/fonts/WebFont.woff2') format('woff2');
 }
 
-#q-app {
+body {
   background-color: #3f4040;
-  font-family: 'WebFont', 'sans-serif';
+  font-family: 'WebFont', sans-serif;
 }
 
 .q-input input {
   text-align: center;
   font-size: 16px;
   color: #e8e6e3;
+}
+
+.q-item {
+  display: table;
+  background-color: #484848;
+  width: 130px;
+  color: #52D273;
+  user-select: none;
+}
+
+.q-item div {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 14px;
 }
 
 .lesson-card {
@@ -29,3 +43,21 @@
   user-select: none;
 }
 
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  background-color: #383939;
+  background-clip: padding-box;
+  border-radius: 20px;
+
+  &:active {
+    background-color: #416C4C;
+  }
+}

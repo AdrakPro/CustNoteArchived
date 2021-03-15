@@ -12,7 +12,7 @@
       <q-icon
         @click="createLesson"
         class="lesson-card__add"
-        name="add"
+        name="mdi-plus"
       />
     </q-card>
   </div>

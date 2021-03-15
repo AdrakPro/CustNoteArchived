@@ -7,14 +7,14 @@
     >
       <template v-slot:prepend>
         <q-icon
-          name="search"
+          name="mdi-magnify"
           class="input__icon"
         />
       </template>
     </q-input>
     <q-tree
       :nodes="treeNodes"
-      :selected="selectedNodeTitle"
+      :selected="selectedSubject"
       :filter="filter"
       :filter-method="filterNodes"
       @update:selected="selectNode($event)"
@@ -24,7 +24,7 @@
     >
     <template v-slot:default-header="prop">
       <Menu :menu-items="createMenuItems(prop.node)" />
-      <div class="subject-node">
+      <div :class="prop.node.style">
         {{ prop.key }}
       </div>
     </template>
@@ -47,7 +47,8 @@ export default {
       db: null,
       keyListener: null,
       lessonId: null,
-      selectedNodeTitle: null,
+      selectedSubject: null,
+      previousSelectedSubject: null,
       filter: '',
       treeNodes: [],
     };
@@ -96,6 +97,7 @@ export default {
             $push: {
               subjects: {
                 subjectTitle: inputValue,
+                content: '',
               },
             },
           });
@@ -120,6 +122,7 @@ export default {
     },
 
     deleteSubject(node) {
+      this.$store.dispatch('editorStore/resetSelectedSubject');
       this.db.atomicUpdate(this.lessonId, (oldData) => {
         delete oldData.subjects[node.id];
         this.$delete(this.treeNodes, node.id);
@@ -128,16 +131,13 @@ export default {
       });
     },
 
-    selectNode(nodeLabel) {
-      if (nodeLabel !== null) {
-        this.selectedNodeTitle = nodeLabel;
-        this.emitSubjectToNoteEditor();
-      }
-    },
+    selectNode(nodeKey) {
+      if (nodeKey !== null) {
+        const subject = this.$refs.tree.getNodeByKey(nodeKey);
 
-    emitSubjectToNoteEditor() {
-      const { label, content } = this.$refs.tree.getNodeByKey(this.selectedNodeTitle);
-      this.$emit('emitSubjectToNoteEditor', { subjectTitle: label, content });
+        this.$store.dispatch('editorStore/setSelectedSubject', subject);
+        this.$store.dispatch('editorStore/selectSubject', { subject, select: true });
+      }
     },
 
     filterNodes(node, filter) {
@@ -183,12 +183,11 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .tree-parent {
   width: 300px;
   height: 100%;
   background-color: #464646;
-  box-shadow: 1px 0 9px 0 #333333;
 }
 
 .tree {
@@ -199,8 +198,13 @@ export default {
 .subject-node {
   font-size: 22px;
   font-weight: bold;
-  color: #52D273;
+  color: #B3B8BC;
   user-select: none;
+}
+
+.selected-node {
+  @extend .subject-node;
+  color: #52D273;
 }
 
 .dialog {

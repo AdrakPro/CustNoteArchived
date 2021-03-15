@@ -39,6 +39,7 @@ function createWindow() {
     },
   });
 
+  mainWindow.setMenu(null);
   mainWindow.loadURL(process.env.APP_URL);
 
   mainWindow.on('closed', () => {
