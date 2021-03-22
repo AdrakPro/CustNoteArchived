@@ -54,10 +54,10 @@ export default {
     },
 
     /* Triggers when enter is pressed on q-input, validate input, persist data to store and db */
-    async submitLessonTitle(lessonTitle) {
+    submitLessonTitle(lessonTitle) {
       if (this.validateInput(lessonTitle)) {
         if (this.previousTitle === null) {
-          await this.db.updateDoc(this.sectionTitle, {
+          this.db.updateDoc(this.sectionTitle, {
             $push: {
               lessons: {
                 lessonTitle,
@@ -66,7 +66,7 @@ export default {
             },
           });
         } else {
-          await this.db.atomicUpdate(this.sectionTitle, (oldData) => {
+          this.db.atomicUpdate(this.sectionTitle, (oldData) => {
             const previousLessonIndex = this.findLessonIndex(oldData.lessons, this.previousTitle);
 
             oldData.lessons[previousLessonIndex].lessonTitle = lessonTitle;

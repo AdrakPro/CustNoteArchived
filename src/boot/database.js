@@ -1,10 +1,11 @@
-import { addRxPlugin, createRxDatabase } from 'rxdb';
 import IdbAdapter from 'pouchdb-adapter-indexeddb';
+import { addRxPlugin, createRxDatabase } from 'rxdb';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
 import { RxDBKeyCompressionPlugin } from 'rxdb/plugins/key-compression';
-import { RxDBValidatePlugin } from 'rxdb/plugins/validate';
+import { RxDBValidateZSchemaPlugin } from 'rxdb/plugins/validate-z-schema';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 import { RxDBJsonDumpPlugin } from 'rxdb/plugins/json-dump';
+import router from '../router/index';
 
 const sectionSchema = {
   keyCompression: true,
@@ -59,12 +60,12 @@ const subjectSchema = {
   },
 };
 
-/* Initialize database and return Map of it's collections */
-async function getDb() {
+/* Create database with all collections */
+async function createDb() {
   addRxPlugin(IdbAdapter);
   addRxPlugin(RxDBQueryBuilderPlugin);
   addRxPlugin(RxDBKeyCompressionPlugin);
-  addRxPlugin(RxDBValidatePlugin);
+  addRxPlugin(RxDBValidateZSchemaPlugin);
   addRxPlugin(RxDBUpdatePlugin);
   addRxPlugin(RxDBJsonDumpPlugin);
 
@@ -86,19 +87,39 @@ async function getDb() {
     },
   });
 
-  const collectionsMap = new Map();
-  collectionsMap.set('sections', db.sections);
-  collectionsMap.set('subjects', db.subjects);
-
-  return collectionsMap;
+  return db;
 }
 
-/* Be sure to initialize only once to prevent database errors */
-const collectionMap = getDb().then((collectionMap) => collectionMap);
+/* Initialize only once to prevent database errors */
+const db = createDb().then((db) => db);
 
-/* Get collection from database finding with @collectionName parameter */
+/* Export database to JSON */
+async function exportDb() {
+  return db.then((db) => db.dump());
+}
+
+/* Get present db then clear all collections then import backup */
+function importDb(jsonDb) {
+  db.then((db) => {
+    db.remove()
+      .then(() => createDb()
+        .then((db) => {
+          db.importDump(jsonDb)
+            .then(() => {
+              router().push('/')
+                .then(() => window.location.reload());
+            });
+        }));
+  });
+}
+
+/* Get collection from database with @collectionName parameter */
 function getCollection(collectionName) {
-  return collectionMap.then((collectionMap) => collectionMap.get(collectionName));
+  return db.then((db) => db[collectionName]);
 }
 
-export default getCollection;
+export {
+  exportDb,
+  importDb,
+  getCollection,
+};

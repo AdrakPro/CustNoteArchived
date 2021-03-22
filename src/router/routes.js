@@ -3,7 +3,7 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout'),
     children: [
-      { path: '', component: () => import('pages/SectionsPage') },
+      { path: '/', component: () => import('pages/SectionsPage') },
     ],
   },
   {

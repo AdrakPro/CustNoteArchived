@@ -5,6 +5,7 @@
         v-for="section in sections"
         :key="section.sectionTitle"
         :section="section"
+        :db="db"
       />
     </div>
   </q-page>
@@ -12,6 +13,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import DatabaseApi, { SECTIONS, SECTIONS_PRIMARY_KEY } from 'components/utils/databaseApi';
 import KeyListener, { CTRL_S_KEY } from 'components/utils/keyListener';
 import Section from 'components/Section';
 
@@ -20,11 +22,13 @@ export default {
 
   data() {
     return {
+      db: null,
       keyListener: null,
     };
   },
 
   created() {
+    this.db = new DatabaseApi(SECTIONS, SECTIONS_PRIMARY_KEY);
     this.keyListener = new KeyListener();
   },
 

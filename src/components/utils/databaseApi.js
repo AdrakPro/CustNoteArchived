@@ -1,4 +1,4 @@
-import getCollection from 'boot/database';
+import { getCollection } from 'boot/database';
 
 export default class DatabaseApi {
   constructor(collectionName, primaryKeyName) {

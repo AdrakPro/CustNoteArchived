@@ -22,6 +22,12 @@
             icon="mdi-format-italic"
             unelevated
           />
+          <q-btn
+            :class="{ 'is-active': isActive.highlight_text() }"
+            @click="commands.highlight_text"
+            icon="mdi-format-color-highlight"
+            unelevated
+          />
         </div>
         <div class="menubar__group">
           <q-btn
@@ -52,6 +58,11 @@
             :class="{ 'is-active': isActive.code_block() }"
             @click="commands.code_block"
             icon="mdi-code-tags"
+            unelevated
+          />
+          <q-btn
+            @click="showImagePrompt(commands.image)"
+            icon="mdi-image"
             unelevated
           />
           <q-btn
@@ -129,6 +140,8 @@ import {
   Blockquote,
   CodeBlock,
   CodeBlockHighlight,
+  Image,
+  TrailingNode,
   Table,
   TableRow,
   TableHeader,
@@ -140,6 +153,8 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import css from 'highlight.js/lib/languages/css';
 import scss from 'highlight.js/lib/languages/scss';
 import xml from 'highlight.js/lib/languages/xml';
+import HighlightText from 'components/editor/extensions/highlightText';
+import InlineMath from 'components/editor/extensions/math/math';
 
 export default {
   name: 'Editor',
@@ -166,6 +181,23 @@ export default {
   },
 
   methods: {
+    showImagePrompt(command) {
+      this.$q.dialog({
+        title: 'Enter the url of image',
+        class: 'dialog',
+        color: 'positive',
+        prompt: {
+          rounded: true,
+          model: '',
+          isValid: (inputValue) => inputValue.length > 0,
+          type: 'text',
+        },
+        cancel: true,
+      }).onOk((src) => {
+        command({ src });
+      });
+    },
+
     initializeEditor() {
       this.editor = new Editor({
         extensions: [
@@ -174,13 +206,20 @@ export default {
           new OrderedList(),
           new Blockquote(),
           new CodeBlock(),
+          new Image(),
           new CodeBlockHighlight({
             languages: { javascript, css, scss, xml },
           }),
           new ListItem(),
           new Bold(),
           new Italic(),
+          new InlineMath(),
+          new HighlightText(),
           new History(),
+          new TrailingNode({
+            node: 'paragraph',
+            notAfter: ['paragraph'],
+          }),
           new HardBreak(),
           new Table({
             resizable: true,
@@ -193,7 +232,7 @@ export default {
     },
 
     persistContent(subject) {
-      if (subject.content !== '') {
+      if (subject.id !== null) {
         const editorContent = this.editor.getHTML();
 
         this.db.atomicUpdate(this.lessonId, (oldData) => {

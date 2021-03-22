@@ -4,24 +4,39 @@
       <q-btn-group class="full-height" spread unelevated>
         <q-btn
           class="tool-bar__button"
-          @click="redirectToHome()"
+          @click="redirectToHome"
         >Lessons</q-btn>
         <q-btn class="tool-bar__button">Articles</q-btn>
         <q-btn class="tool-bar__button">Exercises</q-btn>
-        <q-btn class="tool-bar__button">Settings</q-btn>
+        <q-btn
+          class="tool-bar__button"
+          @click="openDialog"
+        >Settings</q-btn>
       </q-btn-group>
     </q-header>
-
+    <Dialog
+      :show-dialog.sync="showSettingsDialog"
+      dialog-title="Settings"
+      content-component-name="SettingsDialog"
+      @closeDialog="closeDialog"
+    />
     <q-page-container>
       <router-view />
     </q-page-container>
-
   </q-layout>
 </template>
 
 <script>
+import Dialog from 'components/dialogs/GenericDialog';
+
 export default {
   name: 'MainLayout',
+
+  data() {
+    return {
+      showSettingsDialog: false,
+    };
+  },
 
   methods: {
     redirectToHome() {
@@ -29,7 +44,17 @@ export default {
         this.$router.push('/');
       }
     },
+
+    openDialog() {
+      this.showSettingsDialog = true;
+    },
+
+    closeDialog() {
+      this.showSettingsDialog = false;
+    },
   },
+
+  components: { Dialog },
 };
 </script>
 

@@ -69,6 +69,8 @@ module.exports = {
     'no-plusplus': 'off',
     'max-len': 'off',
     'object-curly-newline': 'off',
+    'class-methods-use-this': 'off',
+    'func-names': 'off',
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'

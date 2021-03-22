@@ -46,14 +46,9 @@ export default {
 
   data() {
     return {
-      db: null,
       sectionTitleInput: '',
       showLessonDialog: false,
     };
-  },
-
-  created() {
-    this.db = new DatabaseApi(SECTIONS, SECTIONS_PRIMARY_KEY);
   },
 
   methods: {
@@ -125,6 +120,7 @@ export default {
   },
 
   props: {
+    db: Object,
     section: Object,
   },
 
