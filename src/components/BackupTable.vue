@@ -1,30 +1,38 @@
 <template>
-  <q-markup-table
-    separator="vertical"
-    dense
-    flat
-  >
-    <thead>
-    <tr>
-      <th>Backup name</th>
-      <th>Creation date</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr
-      v-for="backup in backups"
-      :key="backup.name"
-      @dblclick="restoreBackup(backup.name)"
+  <div class="row">
+    <q-markup-table
+      separator="vertical"
+      dense
+      flat
     >
-      <td>{{ backup.name }}</td>
-      <td>{{ backup.birthTime }}</td>
-    </tr>
-    </tbody>
-  </q-markup-table>
+      <thead>
+      <tr>
+        <th>Backup name</th>
+        <th>Creation date</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr
+        v-for="backup in backups"
+        :key="backup.name"
+        @dblclick="applyBackup(backup.name)"
+      >
+        <td>{{ backup.name }}</td>
+        <td>{{ backup.birthTime }}</td>
+      </tr>
+      </tbody>
+    </q-markup-table>
+    <div>
+      <q-btn
+        @click="createBackup"
+        icon="mdi-plus"
+      />
+    </div>
+  </div>
 </template>
 
 <script>
-import { getBackups, readBackup } from 'components/utils/fsApi';
+import { getBackups, writeBackup, readBackup } from 'components/utils/fsApi';
 
 export default {
   name: 'BackupTable',
@@ -42,8 +50,12 @@ export default {
   },
 
   methods: {
-    restoreBackup(backupName) {
+    applyBackup(backupName) {
       readBackup(backupName);
+    },
+
+    createBackup() {
+      writeBackup();
     },
   },
 };

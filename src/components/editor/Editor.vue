@@ -440,7 +440,7 @@ export default {
     }
 
     ol, ul {
-      padding-left: 0.8rem;
+      padding-left: 0.5rem;
       list-style: none;
     }
 
@@ -460,15 +460,15 @@ export default {
       & li::before {
         counter-increment: item;
         content: counter(item) ' )';
-        padding-right: 6px;
+        padding-right: 5px;
         color: #52D273;
         font-weight: bold;
       }
     }
 
     ul li::before {
-      content: '>';
-      padding-right: 6px;
+      content: '=>';
+      padding-right: 5px;
       color: #52D273;
       font-weight: bold;
     }

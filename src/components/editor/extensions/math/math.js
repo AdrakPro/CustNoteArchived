@@ -45,7 +45,6 @@ export default class Math extends Node {
       methods: {
         // Updates katex-render with node textContent.
         render(textContent) {
-          console.log(this.node);
           katex.render(textContent, this.$refs.render, {
             throwOnError: false, displayMode: false,
           });
