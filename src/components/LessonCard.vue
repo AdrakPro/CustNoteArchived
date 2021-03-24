@@ -5,6 +5,7 @@
         <q-input
           v-model="lessonTitleInput"
           @keydown.enter="submitLessonTitle"
+          maxlength="16"
           style="padding: 2vh 1vh 0 1vh"
           class="lesson-card__input"
           color="positive"

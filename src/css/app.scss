@@ -44,6 +44,7 @@ body {
 }
 
 ::-webkit-scrollbar {
+  background: #3f4040;
   width: 8px;
 }
 
@@ -53,7 +54,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   cursor: pointer;
-  background-color: #383939;
+  background-color: #333333;
   background-clip: padding-box;
   border-radius: 20px;
 

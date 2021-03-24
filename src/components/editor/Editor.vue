@@ -9,6 +9,14 @@
       v-slot="{ commands, isActive }"
     >
       <div class="menubar">
+        <input
+          v-show="searchedText !== null"
+          v-model="searchedText"
+          @keydown.enter.prevent="commands.find(searchedText)"
+          ref="search"
+          class="search"
+          placeholder="Search text"
+        />
         <div class="menubar__group">
           <q-btn
             :class="{ 'is-active': isActive.bold() }"
@@ -121,7 +129,7 @@
       </div>
     </editor-menu-bar>
     <div class="editor__content">
-      <editor-content :editor="editor"/>
+      <editor-content ref="editorElements" :editor="editor"/>
     </div>
   </div>
 </template>
@@ -129,25 +137,27 @@
 <script>
 import { mapState } from 'vuex';
 import DatabaseApi, { SUBJECTS, SUBJECTS_PRIMARY_KEY } from 'components/utils/databaseApi';
+import KeyListener from 'components/utils/keyListener';
 import { Editor, EditorContent, EditorMenuBar } from 'tiptap';
 import {
-  Bold,
-  Italic,
-  Heading,
-  BulletList,
-  OrderedList,
-  ListItem,
   Blockquote,
+  Bold,
+  BulletList,
   CodeBlock,
   CodeBlockHighlight,
-  Image,
-  TrailingNode,
-  Table,
-  TableRow,
-  TableHeader,
-  TableCell,
   HardBreak,
+  Heading,
   History,
+  Image,
+  Italic,
+  ListItem,
+  OrderedList,
+  Table,
+  TableCell,
+  TableHeader,
+  TableRow,
+  TrailingNode,
+  Search,
 } from 'tiptap-extensions';
 import javascript from 'highlight.js/lib/languages/javascript';
 import css from 'highlight.js/lib/languages/css';
@@ -164,17 +174,24 @@ export default {
       editor: null,
       lessonId: null,
       db: null,
+      searchedText: null,
     };
   },
 
   created() {
     this.db = new DatabaseApi(SUBJECTS, SUBJECTS_PRIMARY_KEY);
+    this.keyListener = new KeyListener();
     this.lessonId = this.$route.params.lessonId;
 
     this.initializeEditor();
   },
 
+  mounted() {
+    this.keyListener.addKeyListener('f', this.enableSearch, this);
+  },
+
   beforeDestroy() {
+    this.searchedText = null;
     this.persistContent(this.selectedSubject);
     this.$store.dispatch('editorStore/resetSelectedSubject');
     this.editor.destroy();
@@ -189,12 +206,16 @@ export default {
         prompt: {
           rounded: true,
           model: '',
-          isValid: (inputValue) => inputValue.length > 0,
+          isValid: (url) => this.isUrlHasImageExtension(url),
           type: 'text',
         },
         cancel: true,
       }).onOk((src) => {
-        command({ src });
+        this.isImgNotNull(src).then((isOk) => {
+          if (isOk) {
+            command({ src });
+          }
+        });
       });
     },
 
@@ -227,6 +248,8 @@ export default {
           new TableRow(),
           new TableHeader(),
           new TableCell(),
+          new Image(),
+          new Search(),
         ],
       });
     },
@@ -239,6 +262,38 @@ export default {
           oldData.subjects[subject.id].content = editorContent;
 
           return oldData;
+        });
+      }
+    },
+
+    isUrlHasImageExtension(url) {
+      return url.match(/\.(jpeg|jpg|gif|png)$/) !== null;
+    },
+
+    // It's temporary/smelly, if url with image exits it will throw cors error which we return true, if not it not exists
+    async isImgNotNull(url) {
+      return new Promise((resolve) => {
+        fetch(url)
+          .then(() => resolve(false))
+          .catch(() => resolve(true));
+      });
+    },
+
+    enableSearch() {
+      const searchInput = this.$refs.search;
+
+      if (this.searchedText !== null) {
+        this.searchedText = null;
+
+        searchInput.dispatchEvent(new KeyboardEvent('keydown', {
+          keyCode: 13,
+        }));
+      } else {
+        this.searchedText = '';
+        this.$nextTick(() => {
+          if (searchInput !== undefined) {
+            searchInput.focus();
+          }
         });
       }
     },
@@ -349,8 +404,15 @@ export default {
       text-align: center;
       line-height: 1.3;
       margin: 0 0 5px;
-      font-size: 3rem;
+      font-size: 48px;
       color: #52D273;
+    }
+
+    img {
+      display: inline-block;
+      max-width: 400px;
+      max-height: 400px;
+      border-radius: 5px;
     }
 
     pre {
@@ -440,8 +502,12 @@ export default {
     }
 
     ol, ul {
-      padding-left: 0.5rem;
+      padding-left: 8px;
       list-style: none;
+
+      li {
+        margin-bottom: 4px;
+      }
     }
 
     li > ol,
@@ -457,7 +523,7 @@ export default {
     ol {
       counter-reset: item;
 
-      & li::before {
+      & > li::before {
         counter-increment: item;
         content: counter(item) ' )';
         padding-right: 5px;
@@ -543,9 +609,24 @@ export default {
   margin-bottom: 15px;
 }
 
+.search {
+  background-color: #464646;
+  border: none;
+  border-radius: 3px;
+  float: left;
+  width: 150px;
+  height: 36px;
+  text-align: left;
+  color: #e8e6e3;
+
+  &::placeholder {
+    color: #B3B8BC;
+  }
+}
+
 .menubar__group {
   display: inline-block;
-  border-right: 1px inset #B3B8BC;
+  border-right: 1px inset #52D273;
   margin: 0 5px 5px 0;
 
   &:last-child {
@@ -563,5 +644,10 @@ export default {
 
 .menubar__group > button[type="button"].is-active {
   background-color: #515c54;
+}
+
+.find {
+  background-color: #42557b;
+  border: 1px solid #528bff;
 }
 </style>

@@ -6,20 +6,20 @@
   display: inline;
 }
 
-.ProseMirror .Math .katex-render .katex {
+.ProseMirror .math .katex-render .katex {
   font-size: 18px;
 }
 
-.ProseMirror .Math .katex-render .katex-error {
+.ProseMirror .math .katex-render .katex-error {
   font-family: "KaTeX_SansSerif", sans-serif;
   padding: 0;
 }
 
-.ProseMirror .Math .decoration-inline-math {
+.ProseMirror .math .decoration-inline-math {
   color: #52D273;
 }
 
-.Math .hidden {
+.math .hidden {
   position: absolute;
 
   width: 1px;
@@ -35,7 +35,7 @@
   overflow: hidden;
 }
 
-.Math .active {
+.math .active {
   position: static;
 
   width: auto;

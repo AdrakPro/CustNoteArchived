@@ -71,6 +71,7 @@ module.exports = {
     'object-curly-newline': 'off',
     'class-methods-use-this': 'off',
     'func-names': 'off',
+    'no-tabs': 'off',
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'

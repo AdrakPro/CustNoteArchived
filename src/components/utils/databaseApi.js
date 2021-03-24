@@ -12,7 +12,7 @@ export default class DatabaseApi {
         collection.find()
           .exec()
           .then((docs) => resolve(docs));
-      });
+      }).catch((err) => throw err);
     });
   }
 
@@ -24,26 +24,26 @@ export default class DatabaseApi {
           .eq(keyValue)
           .exec()
           .then((doc) => resolve(doc));
-      });
+      }).catch((err) => throw err);
     });
   }
 
   async insertDoc(object) {
     this.collection.then((collection) => {
       collection.insert(object);
-    });
+    }).catch((err) => throw err);
   }
 
   async updateDoc(keyValue, query) {
     await this.findDoc(keyValue).then((doc) => {
       doc.update(query);
-    });
+    }).catch((err) => throw err);
   }
 
   async atomicUpdate(keyValue, changeFn) {
     await this.findDoc(keyValue).then((doc) => {
       doc.atomicUpdate(changeFn);
-    });
+    }).catch((err) => throw err);
   }
 
   async deleteDoc(keyValue) {
@@ -51,7 +51,7 @@ export default class DatabaseApi {
       if (doc !== null) {
         doc.remove();
       }
-    });
+    }).catch((err) => throw err);
   }
 }
 
