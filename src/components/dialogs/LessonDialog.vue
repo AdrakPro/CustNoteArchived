@@ -54,7 +54,7 @@ export default {
     },
 
     /* Triggers when enter is pressed on q-input, validate input, persist data to store and db */
-    submitLessonTitle(lessonTitle) {
+    async submitLessonTitle(lessonTitle) {
       if (this.validateInput(lessonTitle)) {
         if (this.previousTitle === null) {
           this.db.updateDoc(this.sectionTitle, {
@@ -66,10 +66,11 @@ export default {
             },
           });
         } else {
-          this.db.atomicUpdate(this.sectionTitle, (oldData) => {
+          await this.db.atomicUpdate(this.sectionTitle, (oldData) => {
             const previousLessonIndex = this.findLessonIndex(oldData.lessons, this.previousTitle);
 
             oldData.lessons[previousLessonIndex].lessonTitle = lessonTitle;
+
             return oldData;
           });
         }
@@ -92,7 +93,7 @@ export default {
         this.db.atomicUpdate(this.sectionTitle, (oldData) => {
           const lessonIndex = this.findLessonIndex(oldData.lessons, lessonTitle);
 
-          delete oldData.lessons[lessonIndex];
+          oldData.lessons[lessonIndex] = null;
           return oldData;
         });
       }
@@ -134,7 +135,7 @@ export default {
 
     findLessonIndex(lessons, lessonTitle) {
       return lessons.findIndex((lesson) => {
-        if (lesson !== undefined) {
+        if (lesson !== null) {
           return lesson.lessonTitle === lessonTitle;
         }
 

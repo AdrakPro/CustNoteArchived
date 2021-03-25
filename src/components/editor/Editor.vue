@@ -9,14 +9,6 @@
       v-slot="{ commands, isActive }"
     >
       <div class="menubar">
-        <input
-          v-show="searchedText !== null"
-          v-model="searchedText"
-          @keydown.enter.prevent="commands.find(searchedText)"
-          ref="search"
-          class="search"
-          placeholder="Search text"
-        />
         <div class="menubar__group">
           <q-btn
             :class="{ 'is-active': isActive.bold() }"
@@ -137,7 +129,6 @@
 <script>
 import { mapState } from 'vuex';
 import DatabaseApi, { SUBJECTS, SUBJECTS_PRIMARY_KEY } from 'components/utils/databaseApi';
-import KeyListener from 'components/utils/keyListener';
 import { Editor, EditorContent, EditorMenuBar } from 'tiptap';
 import {
   Blockquote,
@@ -157,7 +148,6 @@ import {
   TableHeader,
   TableRow,
   TrailingNode,
-  Search,
 } from 'tiptap-extensions';
 import javascript from 'highlight.js/lib/languages/javascript';
 import css from 'highlight.js/lib/languages/css';
@@ -174,24 +164,17 @@ export default {
       editor: null,
       lessonId: null,
       db: null,
-      searchedText: null,
     };
   },
 
   created() {
     this.db = new DatabaseApi(SUBJECTS, SUBJECTS_PRIMARY_KEY);
-    this.keyListener = new KeyListener();
     this.lessonId = this.$route.params.lessonId;
 
     this.initializeEditor();
   },
 
-  mounted() {
-    this.keyListener.addKeyListener('f', this.enableSearch, this);
-  },
-
   beforeDestroy() {
-    this.searchedText = null;
     this.persistContent(this.selectedSubject);
     this.$store.dispatch('editorStore/resetSelectedSubject');
     this.editor.destroy();
@@ -211,11 +194,12 @@ export default {
         },
         cancel: true,
       }).onOk((src) => {
-        this.isImgNotNull(src).then((isOk) => {
-          if (isOk) {
-            command({ src });
-          }
-        });
+        command({ src });
+        // this.isImgNotNull(src).then((isOk) => {
+        //   if (isOk) {
+        //     command({ src });
+        //   }
+        // });
       });
     },
 
@@ -249,7 +233,6 @@ export default {
           new TableHeader(),
           new TableCell(),
           new Image(),
-          new Search(),
         ],
       });
     },
@@ -271,32 +254,13 @@ export default {
     },
 
     // It's temporary/smelly, if url with image exits it will throw cors error which we return true, if not it not exists
-    async isImgNotNull(url) {
-      return new Promise((resolve) => {
-        fetch(url)
-          .then(() => resolve(false))
-          .catch(() => resolve(true));
-      });
-    },
-
-    enableSearch() {
-      const searchInput = this.$refs.search;
-
-      if (this.searchedText !== null) {
-        this.searchedText = null;
-
-        searchInput.dispatchEvent(new KeyboardEvent('keydown', {
-          keyCode: 13,
-        }));
-      } else {
-        this.searchedText = '';
-        this.$nextTick(() => {
-          if (searchInput !== undefined) {
-            searchInput.focus();
-          }
-        });
-      }
-    },
+    // async isImgNotNull(url) {
+    //   return new Promise((resolve) => {
+    //     fetch(url)
+    //       .then(() => resolve(false))
+    //       .catch(() => resolve(true));
+    //   });
+    // },
   },
 
   computed: {
@@ -312,7 +276,10 @@ export default {
         return;
       }
 
-      this.$store.dispatch('editorStore/selectSubject', { subject: previousSubject, selected: false });
+      this.$store.dispatch('editorStore/selectSubject', {
+        subject: previousSubject,
+        selected: false,
+      });
 
       if (previousSubject.id !== null) {
         previousSubject.content = this.editor.getHTML();
@@ -609,21 +576,6 @@ export default {
   margin-bottom: 15px;
 }
 
-.search {
-  background-color: #464646;
-  border: none;
-  border-radius: 3px;
-  float: left;
-  width: 150px;
-  height: 36px;
-  text-align: left;
-  color: #e8e6e3;
-
-  &::placeholder {
-    color: #B3B8BC;
-  }
-}
-
 .menubar__group {
   display: inline-block;
   border-right: 1px inset #52D273;
@@ -644,10 +596,5 @@ export default {
 
 .menubar__group > button[type="button"].is-active {
   background-color: #515c54;
-}
-
-.find {
-  background-color: #42557b;
-  border: 1px solid #528bff;
 }
 </style>

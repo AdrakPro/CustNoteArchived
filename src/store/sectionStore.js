@@ -18,7 +18,7 @@ const actions = {
       for (let i = 0, l = docs.length; i < l; ++i) {
         dataToNormalize.push({
           sectionTitle: docs[i].sectionTitle,
-          lessons: docs[i].lessons,
+          lessons: docs[i].lessons.filter((lesson) => lesson !== null),
         });
       }
 
@@ -126,6 +126,7 @@ const mutations = {
 
   SET_PREVIOUS_TITLE(state, title) {
     state.previousTitle = title;
+    console.log(state.previousTitle);
   },
 };
 

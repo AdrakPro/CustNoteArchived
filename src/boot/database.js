@@ -19,7 +19,7 @@ const sectionSchema = {
       type: 'array',
       default: [],
       items: {
-        type: 'object',
+        type: ['object', 'null'],
         properties: {
           lessonTitle: {
             type: 'string',
