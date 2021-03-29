@@ -250,7 +250,7 @@ export default {
     },
 
     isUrlHasImageExtension(url) {
-      return url.match(/\.(jpeg|jpg|gif|png)$/) !== null;
+      return url.match(/\.(jpeg|jpg|gif|png|svg)$/) !== null;
     },
 
     // It's temporary/smelly, if url with image exits it will throw cors error which we return true, if not it not exists
