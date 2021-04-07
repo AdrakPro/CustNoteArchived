@@ -1,6 +1,6 @@
 import { getCollection } from 'boot/database';
 
-export default class DatabaseApi {
+class DatabaseApi {
   constructor(collectionName, primaryKeyName) {
     this.collection = getCollection(collectionName);
     this.primaryKeyName = primaryKeyName;
@@ -12,38 +12,52 @@ export default class DatabaseApi {
         collection.find()
           .exec()
           .then((docs) => resolve(docs));
-      }).catch((err) => throw err);
+      });
     });
   }
 
-  async findDoc(keyValue) {
+  async findDoc(docKey) {
     return new Promise((resolve) => {
       this.collection.then((collection) => {
         collection.findOne()
           .where(this.primaryKeyName)
-          .eq(keyValue)
+          .eq(docKey)
           .exec()
           .then((doc) => resolve(doc));
-      }).catch((err) => throw err);
+      });
     });
   }
 
   async insertDoc(object) {
-    this.collection.then((collection) => {
-      collection.insert(object);
-    }).catch((err) => throw err);
+    this.collection.then((collection) => collection.insert(object));
   }
 
-  async updateDoc(keyValue, query) {
-    await this.findDoc(keyValue).then((doc) => {
-      doc.update(query);
-    }).catch((err) => throw err);
+  async updateDoc(docKey, query) {
+    await this.findDoc(docKey).then((doc) => doc.update(query));
   }
 
-  async atomicUpdate(keyValue, changeFn) {
-    await this.findDoc(keyValue).then((doc) => {
-      doc.atomicUpdate(changeFn);
-    }).catch((err) => throw err);
+  async atomicUpdate(docKey, changeFn) {
+    await this.findDoc(docKey).then((doc) => doc.atomicUpdate(changeFn));
+  }
+
+  async upsertDoc(previousTitle, content) {
+    if (previousTitle === null) {
+      await this.insertDoc(content);
+    } else {
+      await this.updateDoc(previousTitle, {
+        $set: content,
+      });
+    }
+  }
+
+  async atomicUpsert({ previousTitle, docKey, content, changeFn }) {
+    if (previousTitle === null) {
+      await this.updateDoc(docKey, {
+        $push: content,
+      });
+    } else {
+      await this.atomicUpdate(docKey, changeFn);
+    }
   }
 
   async deleteDoc(keyValue) {
@@ -51,17 +65,18 @@ export default class DatabaseApi {
       if (doc !== null) {
         doc.remove();
       }
-    }).catch((err) => throw err);
+    });
   }
 }
 
 const SECTIONS = 'sections';
 const SUBJECTS = 'subjects';
 
-const SECTIONS_PRIMARY_KEY = 'sectionTitle';
+const SECTIONS_PRIMARY_KEY = 'title';
 const SUBJECTS_PRIMARY_KEY = 'lessonId';
 
 export {
+  DatabaseApi,
   SECTIONS,
   SUBJECTS,
   SECTIONS_PRIMARY_KEY,

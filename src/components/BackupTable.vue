@@ -22,10 +22,11 @@
       </tr>
       </tbody>
     </q-markup-table>
-    <div>
+    <div class="full-width">
       <q-btn
         @click="createBackup"
         icon="mdi-plus"
+        class="q-markup-table__button"
       />
     </div>
   </div>
@@ -64,17 +65,22 @@ export default {
 <style lang="scss">
 .q-markup-table {
   width: 100%;
-  background-color: #484848;
-  color: #e8e6e3;
+  background-color: $primary;
+  color: $white;
   text-align: center;
 
   table th {
-    color: #52D273;
+    color: $positive;
     font-weight: bold;
   }
 
   table td {
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  &__button {
+    width: 100%;
+    color: $positive;
   }
 }
 

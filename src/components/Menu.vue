@@ -8,11 +8,11 @@
   >
     <q-item
       v-for="item in menuItems"
-      :key="item.itemTitle"
+      :key="item.text"
       :disable="isMenuDisabled"
       @click="item.executeFn(...item.executeFnParams)"
       clickable
-    ><div>{{ item.itemTitle }}</div>
+    ><div>{{ item.text }}</div>
     </q-item>
   </q-menu>
 </template>
@@ -35,8 +35,22 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .q-menu {
   background-color: transparent;
+}
+
+.q-item {
+  display: table;
+  background-color: $primary;
+  width: 130px;
+  color: $positive;
+  user-select: none;
+}
+
+.q-item div {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 14px;
 }
 </style>

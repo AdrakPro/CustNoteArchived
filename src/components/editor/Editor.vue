@@ -121,14 +121,14 @@
       </div>
     </editor-menu-bar>
     <div class="editor__content">
-      <editor-content ref="editorElements" :editor="editor"/>
+      <editor-content :editor="editor"/>
     </div>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
-import DatabaseApi, { SUBJECTS, SUBJECTS_PRIMARY_KEY } from 'components/utils/databaseApi';
+import { DatabaseApi, SUBJECTS, SUBJECTS_PRIMARY_KEY } from 'components/utils/databaseApi';
 import { Editor, EditorContent, EditorMenuBar } from 'tiptap';
 import {
   Blockquote,
@@ -162,49 +162,24 @@ export default {
   data() {
     return {
       editor: null,
-      lessonId: null,
-      db: null,
     };
   },
 
   created() {
-    this.db = new DatabaseApi(SUBJECTS, SUBJECTS_PRIMARY_KEY);
     this.lessonId = this.$route.params.lessonId;
-
-    this.initializeEditor();
+    this.db = new DatabaseApi(SUBJECTS, SUBJECTS_PRIMARY_KEY);
+    this.editor = this.getEditor();
   },
 
   beforeDestroy() {
-    this.persistContent(this.selectedSubject);
-    this.$store.dispatch('editorStore/resetSelectedSubject');
+    this.persistSubjectContent(this.selectedSubject);
+    this.resetSelectedSubject();
     this.editor.destroy();
   },
 
   methods: {
-    showImagePrompt(command) {
-      this.$q.dialog({
-        title: 'Enter the url of image',
-        class: 'dialog',
-        color: 'positive',
-        prompt: {
-          rounded: true,
-          model: '',
-          isValid: (url) => this.isUrlHasImageExtension(url),
-          type: 'text',
-        },
-        cancel: true,
-      }).onOk((src) => {
-        command({ src });
-        // this.isImgNotNull(src).then((isOk) => {
-        //   if (isOk) {
-        //     command({ src });
-        //   }
-        // });
-      });
-    },
-
-    initializeEditor() {
-      this.editor = new Editor({
+    getEditor() {
+      return new Editor({
         extensions: [
           new Heading({ levels: [1] }),
           new BulletList(),
@@ -221,14 +196,9 @@ export default {
           new InlineMath(),
           new HighlightText(),
           new History(),
-          new TrailingNode({
-            node: 'paragraph',
-            notAfter: ['paragraph'],
-          }),
+          new TrailingNode({ node: 'paragraph', notAfter: ['paragraph'] }),
           new HardBreak(),
-          new Table({
-            resizable: true,
-          }),
+          new Table({ resizable: true }),
           new TableRow(),
           new TableHeader(),
           new TableCell(),
@@ -237,30 +207,55 @@ export default {
       });
     },
 
-    persistContent(subject) {
-      if (subject.id !== null) {
-        const editorContent = this.editor.getHTML();
+    persistSubjectContent(subject) {
+      const { id } = subject;
+
+      if (id !== null) {
+        const content = this.editor.getHTML();
 
         this.db.atomicUpdate(this.lessonId, (oldData) => {
-          oldData.subjects[subject.id].content = editorContent;
+          oldData.subjects[id].content = content;
 
           return oldData;
-        });
+        }).then(() => this.$store.dispatch('editorStore/setSubjectContent', { subject, content }));
       }
+    },
+
+    setEditorContent(content) {
+      if (content !== null) {
+        this.editor.setContent(content);
+      }
+    },
+
+    unselectSubject(subject) {
+      this.$store.dispatch('editorStore/selectSubject', {
+        subject,
+        selected: false,
+      });
+    },
+
+    showImagePrompt(command) {
+      this.$q.dialog({
+        sectionTitle: 'Enter the url of image',
+        class: 'dialog',
+        color: 'positive',
+        prompt: {
+          rounded: true,
+          model: '',
+          isValid: (url) => this.isUrlHasImageExtension(url),
+          type: 'text',
+        },
+        cancel: true,
+      }).onOk((src) => command({ src }));
     },
 
     isUrlHasImageExtension(url) {
       return url.match(/\.(jpeg|jpg|gif|png|svg)$/) !== null;
     },
 
-    // It's temporary/smelly, if url with image exits it will throw cors error which we return true, if not it not exists
-    // async isImgNotNull(url) {
-    //   return new Promise((resolve) => {
-    //     fetch(url)
-    //       .then(() => resolve(false))
-    //       .catch(() => resolve(true));
-    //   });
-    // },
+    resetSelectedSubject() {
+      this.$store.dispatch('editorStore/resetSelectedSubject');
+    },
   },
 
   computed: {
@@ -271,25 +266,9 @@ export default {
 
   watch: {
     selectedSubject(nextSubject, previousSubject) {
-      if (this.selectedSubject.id === null) {
-        this.editor.clearContent(true);
-        return;
-      }
-
-      this.$store.dispatch('editorStore/selectSubject', {
-        subject: previousSubject,
-        selected: false,
-      });
-
-      if (previousSubject.id !== null) {
-        previousSubject.content = this.editor.getHTML();
-        this.persistContent(previousSubject);
-      }
-
-      if (nextSubject.content !== undefined) {
-        this.editor.setContent(nextSubject.content);
-      }
-
+      this.unselectSubject(previousSubject);
+      this.persistSubjectContent(previousSubject);
+      this.setEditorContent(nextSubject.content);
       this.editor.focus();
     },
   },
@@ -305,7 +284,7 @@ export default {
   padding: 5px 15px;
   border-radius: 10px;
   background-color: #464646;
-  color: #e8e6e3;
+  color: $white;
   box-shadow: 0 5px 15px 1px rgba(51,51,51,0.8);
 
   :focus {
@@ -372,7 +351,7 @@ export default {
       line-height: 1.3;
       margin: 0 0 5px;
       font-size: 48px;
-      color: #52D273;
+      color: $positive;
     }
 
     img {
@@ -384,7 +363,7 @@ export default {
 
     pre {
       padding: .7rem 1rem;
-      border-left: 3px solid #52D273;
+      border-left: 3px solid $positive;
       border-radius: 5px;
       background: #333333;
       font-size: .8rem;
@@ -403,7 +382,7 @@ export default {
 
         .hljs-comment,
         .hljs-quote {
-          color: #B3B8BC;
+          color: $secondary;
           font-style: italic;
         }
 
@@ -494,7 +473,7 @@ export default {
         counter-increment: item;
         content: counter(item) ' )';
         padding-right: 5px;
-        color: #52D273;
+        color: $positive;
         font-weight: bold;
       }
     }
@@ -502,7 +481,7 @@ export default {
     ul li::before {
       content: '=>';
       padding-right: 5px;
-      color: #52D273;
+      color: $positive;
       font-weight: bold;
     }
 
@@ -511,7 +490,7 @@ export default {
       margin: 0 auto;
       padding: 0 5px;
       background: transparent;
-      border: 2px dotted #52D273;
+      border: 2px dotted $positive;
       max-width: 30vw;
     }
 
@@ -525,7 +504,7 @@ export default {
 
       td, th {
         min-width: 1em;
-        border: 2px solid #B3B8BC;
+        border: 2px solid $secondary;
         padding: 3px 5px;
         text-align: center;
         box-sizing: border-box;
@@ -572,13 +551,13 @@ export default {
 
 .menubar {
   text-align: center;
-  border-bottom: 2px solid #52D273;
+  border-bottom: 2px solid $positive;
   margin-bottom: 15px;
 }
 
 .menubar__group {
   display: inline-block;
-  border-right: 1px inset #52D273;
+  border-right: 1px inset $positive;
   margin: 0 5px 5px 0;
 
   &:last-child {
@@ -589,7 +568,7 @@ export default {
 
 .menubar__group > button[type="button"] {
   margin-right: 3px;
-  color: #52D273;
+  color: $positive;
   width: 36px;
   height: 36px;
 }

@@ -3,7 +3,7 @@
     <div class="full-width">
       <Section
         v-for="section in sections"
-        :key="section.sectionTitle"
+        :key="section.title"
         :section="section"
         :db="db"
       />
@@ -13,8 +13,8 @@
 
 <script>
 import { mapState } from 'vuex';
-import DatabaseApi, { SECTIONS, SECTIONS_PRIMARY_KEY } from 'components/utils/databaseApi';
-import KeyListener, { CTRL_S_KEY } from 'components/utils/keyListener';
+import { DatabaseApi, SECTIONS, SECTIONS_PRIMARY_KEY } from 'components/utils/databaseApi';
+import { KeyListener, CTRL_S } from 'components/utils/keyListener';
 import Section from 'components/Section';
 
 export default {
@@ -23,7 +23,6 @@ export default {
   data() {
     return {
       db: null,
-      keyListener: null,
     };
   },
 
@@ -33,7 +32,7 @@ export default {
   },
 
   mounted() {
-    this.keyListener.addKeyListener(CTRL_S_KEY, this.createSection, this);
+    this.keyListener.addKeyListener(CTRL_S, this.createEmptySection, this);
   },
 
   beforeDestroy() {
@@ -41,16 +40,15 @@ export default {
   },
 
   methods: {
-    /* If sections have not got null field, create dummy object to trigger q-input */
-    createSection() {
-      if (!this.isSectionsHaveNullField()) {
-        this.$store.dispatch('menuStore/disableMenu');
+    createEmptySection() {
+      if (this.isUnSubmittedSectionNotExists) {
         this.$store.dispatch('sectionStore/createEmptySection');
+        this.disableMenu();
       }
     },
 
-    isSectionsHaveNullField() {
-      return Object.prototype.hasOwnProperty.call(this.sections, 'null');
+    disableMenu() {
+      this.$store.dispatch('menuStore/disableMenu');
     },
   },
 
@@ -58,6 +56,10 @@ export default {
     ...mapState('sectionStore', {
       sections: (state) => state.sections,
     }),
+
+    isUnSubmittedSectionNotExists() {
+      return !Object.prototype.hasOwnProperty.call(this.sections, 'null');
+    },
   },
 
   components: { Section },

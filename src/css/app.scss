@@ -16,31 +16,10 @@ body {
   color: #e8e6e3;
 }
 
-.q-item {
-  display: table;
-  background-color: #484848;
-  width: 130px;
-  color: #52D273;
-  user-select: none;
-}
-
-.q-item div {
-  display: table-cell;
-  vertical-align: middle;
-  font-size: 14px;
-}
-
-.lesson-card {
-  display: inline-block;
-  min-width: 150px;
-  max-width: 500px;
-  height: 110px;
-  margin: 15px;
-  border-radius: 15px;
-  border: 0.15rem solid #52D273;
-  background-color: #464646;
-  cursor: pointer;
-  user-select: none;
+.dialog {
+  text-align: center;
+  background-color: $dark;
+  color: $positive;
 }
 
 ::-webkit-scrollbar {

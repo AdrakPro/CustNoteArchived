@@ -1,6 +1,6 @@
 export default class MenuItem {
-  constructor(itemTitle, executeFn, executeFnParams = []) {
-    this.itemTitle = itemTitle;
+  constructor(text, executeFn, executeFnParams = []) {
+    this.text = text;
     this.executeFn = executeFn;
     this.executeFnParams = executeFnParams;
   }

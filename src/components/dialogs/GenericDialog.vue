@@ -1,24 +1,23 @@
 <template>
   <q-dialog
-    :value="showDialog"
+    :value="show"
     persistent
   >
     <div class="dialog">
       <q-bar>
         <q-space />
-        <div class=dialog__tile>{{ dialogTitle }}</div>
+        <div class=dialog__title>{{ title }}</div>
         <q-space />
         <q-icon
           @click="closeDialog"
-          v-close-popup
           class="dialog__close"
           name="mdi-close"
         />
       </q-bar>
-      <div>
+      <div v-if="containerName !== null">
         <component
-          :is="contentDialogComponent"
-          :dialog-title="dialogTitle"
+          :is="contentComponent"
+          :dialog-title="title"
         />
       </div>
     </div>
@@ -30,44 +29,44 @@ export default {
   name: 'GenericDialog',
 
   methods: {
-    /* Emit closeDialog to parent component */
     closeDialog() {
       this.$emit('closeDialog');
     },
   },
 
   computed: {
-    /* Get dynamically imported component based on componentName prop /> */
-    contentDialogComponent() {
-      return () => import(`components/dialogs/${this.contentComponentName}`);
+    contentComponent() {
+      const component = import(`components/dialogs/${this.containerName}`);
+
+      return () => component;
     },
   },
 
   props: {
-    dialogTitle: String,
-    contentComponentName: String,
-    showDialog: Boolean,
+    title: String,
+    containerName: String,
+    show: Boolean,
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .dialog {
-  max-width: 90vw;
   width: 90vw;
+  max-width: 90vw;
   height: 80vh;
-  background: #3f4040;
+  background-color: #3f4040;
 }
 
-.dialog__tile {
+.dialog__title {
   font-weight: bold;
   font-size: 20px;
-  color: #52D273;
+  color: $positive;
 }
 
 .dialog__close {
   font-size: 20px;
   cursor: pointer;
-  color: #52D273;
+  color: $positive;
 }
 </style>

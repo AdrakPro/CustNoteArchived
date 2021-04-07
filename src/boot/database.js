@@ -5,14 +5,13 @@ import { RxDBKeyCompressionPlugin } from 'rxdb/plugins/key-compression';
 import { RxDBValidateZSchemaPlugin } from 'rxdb/plugins/validate-z-schema';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 import { RxDBJsonDumpPlugin } from 'rxdb/plugins/json-dump';
-import router from '../router/index';
 
 const sectionSchema = {
   keyCompression: true,
   version: 0,
   type: 'object',
   properties: {
-    sectionTitle: {
+    title: {
       type: 'string',
     },
     lessons: {
@@ -21,10 +20,10 @@ const sectionSchema = {
       items: {
         type: ['object', 'null'],
         properties: {
-          lessonTitle: {
+          id: {
             type: 'string',
           },
-          lessonId: {
+          title: {
             type: 'string',
           },
         },
@@ -46,9 +45,9 @@ const subjectSchema = {
       type: 'array',
       default: [],
       items: {
-        type: 'object',
+        type: ['object', 'null'],
         properties: {
-          subjectTitle: {
+          title: {
             type: 'string',
           },
           content: {
@@ -60,7 +59,6 @@ const subjectSchema = {
   },
 };
 
-/* Create database with all collections */
 async function createDb() {
   addRxPlugin(IdbAdapter);
   addRxPlugin(RxDBQueryBuilderPlugin);
@@ -90,30 +88,23 @@ async function createDb() {
   return db;
 }
 
-/* Initialize only once to prevent database errors */
 const db = createDb().then((db) => db);
 
-/* Export database to JSON */
 async function exportDb() {
   return db.then((db) => db.dump());
 }
 
-/* Get present db then clear all collections then import backup */
 function importDb(jsonDb) {
   db.then((db) => {
     db.remove()
       .then(() => createDb()
         .then((db) => {
           db.importDump(jsonDb)
-            .then(() => {
-              router().push('/')
-                .then(() => window.location.reload());
-            });
+            .then(() => window.location.reload());
         }));
   });
 }
 
-/* Get collection from database with @collectionName parameter */
 function getCollection(collectionName) {
   return db.then((db) => db[collectionName]);
 }

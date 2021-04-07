@@ -1,4 +1,4 @@
-export default class KeyListener {
+class KeyListener {
   constructor() {
     this.boundListener = null;
   }
@@ -22,8 +22,9 @@ export default class KeyListener {
   }
 }
 
-const CTRL_S_KEY = 's';
+const CTRL_S = 's';
 
 export {
-  CTRL_S_KEY,
+  KeyListener,
+  CTRL_S,
 };

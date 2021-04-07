@@ -1,17 +1,17 @@
 <template>
   <div class="row wrap">
     <LessonCard
-      v-for="lessonTitle in getSectionLessonsBy(this.sectionTitle)"
-      :key="lessonTitle"
-      :lesson="lessons[lessonTitle]"
-      :is-redirecting-disabled="true"
-      :menu-items="createMenuItems(lessonTitle)"
-      @submitLessonTitle="submitLessonTitle"
+      v-for="title in getLessons(this.sectionTitle)"
+      :key="title"
+      :lesson="lessons[title]"
+      :is-redirecting-enabled="false"
+      :menu-items="menuItems(title)"
+      @submitLesson="submitLesson"
     />
-    <q-card class="lesson-card">
+    <q-card class="empty-lesson-card">
       <q-icon
         @click="createLesson"
-        class="lesson-card__add"
+        class="empty-lesson-card__icon"
         name="mdi-plus"
       />
     </q-card>
@@ -20,21 +20,16 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import DatabaseApi, { SECTIONS, SECTIONS_PRIMARY_KEY } from 'components/utils/databaseApi';
+import { DatabaseApi, SECTIONS, SECTIONS_PRIMARY_KEY } from 'components/utils/databaseApi';
 import MenuItem from 'components/models/menuItem';
 import LessonCard from 'components/LessonCard';
 
 export default {
   name: 'LessonDialog',
 
-  data() {
-    return {
-      sectionTitle: this.dialogTitle,
-    };
-  },
-
   created() {
     this.db = new DatabaseApi(SECTIONS, SECTIONS_PRIMARY_KEY);
+    this.sectionTitle = this.dialogTitle;
   },
 
   beforeDestroy() {
@@ -42,125 +37,126 @@ export default {
   },
 
   methods: {
-    /* If sections have not got null field, create dummy object to trigger q-input */
     createLesson() {
-      if (!this.isLessonsHaveNullField()) {
+      if (!this.isUnSubmittedLessonExists) {
         this.$store.dispatch('sectionStore/createEmptyLesson', {
           sectionTitle: this.sectionTitle,
-          lessonId: this.generateLessonId(),
+          id: this.generateLessonId(),
         });
-        this.$store.dispatch('menuStore/disableMenu');
+
+        this.disableMenu();
       }
     },
 
-    /* Triggers when enter is pressed on q-input, validate input, persist data to store and db */
-    async submitLessonTitle(lessonTitle) {
-      if (this.validateInput(lessonTitle)) {
-        if (this.previousTitle === null) {
-          this.db.updateDoc(this.sectionTitle, {
-            $push: {
-              lessons: {
-                lessonTitle,
-                lessonId: this.lessons.null.lessonId,
-              },
-            },
-          });
-        } else {
-          await this.db.atomicUpdate(this.sectionTitle, (oldData) => {
-            const previousLessonIndex = this.findLessonIndex(oldData.lessons, this.previousTitle);
-
-            oldData.lessons[previousLessonIndex].lessonTitle = lessonTitle;
-
-            return oldData;
-          });
-        }
-
-        this.$store.dispatch('sectionStore/setPreviousTitle', null);
-        this.$store.dispatch('sectionStore/setLesson', {
-          sectionTitle: this.sectionTitle,
-          lessonTitle,
-        });
-      } else {
-        this.deleteLesson(null);
-      }
-
-      this.$store.dispatch('menuStore/enableMenu');
+    setLesson(lessonTitle, previousTitle) {
+      this.$store.dispatch('sectionStore/setPreviousTitle', previousTitle);
+      this.$store.dispatch('sectionStore/setLesson', {
+        sectionTitle: this.sectionTitle,
+        lessonTitle,
+      });
     },
 
-    /* Delete lesson from store and db using it's key */
+    renameLesson(previousTitle) {
+      this.setLesson(null, previousTitle);
+      this.disableMenu();
+    },
+
     deleteLesson(lessonTitle) {
-      if (lessonTitle !== null) {
-        this.db.atomicUpdate(this.sectionTitle, (oldData) => {
-          const lessonIndex = this.findLessonIndex(oldData.lessons, lessonTitle);
-
-          oldData.lessons[lessonIndex] = null;
-          return oldData;
-        });
-      }
-
       this.$store.dispatch('sectionStore/deleteLesson', {
         sectionTitle: this.sectionTitle,
         lessonTitle,
       });
     },
 
-    /* Set lessonTitle to null, triggering q-input */
-    renameLesson(previousTitle) {
-      this.$store.dispatch('sectionStore/setPreviousTitle', previousTitle);
-      this.$store.dispatch('sectionStore/setLesson', {
-        sectionTitle: this.sectionTitle,
-        lessonTitle: null,
-      });
-      this.$store.dispatch('menuStore/disableMenu');
+    submitLesson(title) {
+      if (this.validateInput(title)) {
+        this.db.atomicUpsert({
+          previousTitle: this.previousTitle,
+          docKey: this.sectionTitle,
+          content: {
+            lessons: {
+              title,
+              id: this.lessons.null.id,
+            },
+          },
+          changeFn: (oldData) => {
+            const previousLessonIndex = this.findLessonIndex(oldData.lessons, this.previousTitle);
+
+            oldData.lessons[previousLessonIndex].title = title;
+
+            return oldData;
+          },
+        }).then(() => this.setLesson(title, null));
+      } else {
+        this.deleteLesson(null);
+      }
+
+      this.enableMenu();
     },
 
-    /* Check if the last lesson has null lessonTitle field, if so delete it */
+    deleteLessonFromDb(title) {
+      this.db.atomicUpdate(this.sectionTitle, (oldData) => {
+        const lessonIndex = this.findLessonIndex(oldData.lessons, title);
+
+        oldData.lessons[lessonIndex] = null;
+        return oldData;
+      }).then(() => this.deleteLesson(title));
+    },
+
     deleteUnSubmittedLesson() {
-      if (this.isLessonsHaveNullField()) {
+      if (this.isUnSubmittedLessonExists) {
         this.deleteLesson(null);
-        this.$store.dispatch('menuStore/enableMenu');
+        this.enableMenu();
       }
     },
 
-    createMenuItems(lessonTitle) {
+    menuItems(lessonTitle) {
       return [
         new MenuItem('Rename', this.renameLesson, [lessonTitle]),
-        new MenuItem('Delete', this.deleteLesson, [lessonTitle]),
+        new MenuItem('Delete', this.deleteLessonFromDb, [lessonTitle]),
       ];
     },
 
-    validateInput(inputValue) {
-      return inputValue !== '' && this.lessons[inputValue] === undefined;
-    },
-
-    findLessonIndex(lessons, lessonTitle) {
+    findLessonIndex(lessons, title) {
       return lessons.findIndex((lesson) => {
         if (lesson !== null) {
-          return lesson.lessonTitle === lessonTitle;
+          return lesson.title === title;
         }
 
         return false;
       });
     },
 
+    validateInput(title) {
+      return title !== '' && this.lessons[title] === undefined;
+    },
+
     generateLessonId() {
       return Math.random().toString(36).substr(2, 9);
     },
 
-    isLessonsHaveNullField() {
-      return Object.prototype.hasOwnProperty.call(this.lessons, 'null');
+    enableMenu() {
+      this.$store.dispatch('menuStore/enableMenu');
+    },
+
+    disableMenu() {
+      this.$store.dispatch('menuStore/disableMenu');
     },
   },
 
   computed: {
     ...mapState('sectionStore', {
-      previousTitle: (state) => state.previousTitle,
       lessons: (state) => state.lessons,
+      previousTitle: (state) => state.previousTitle,
     }),
 
     ...mapGetters('sectionStore', {
-      getSectionLessonsBy: 'getSectionLessonsBy',
+      getLessons: 'getLessons',
     }),
+
+    isUnSubmittedLessonExists() {
+      return Object.prototype.hasOwnProperty.call(this.lessons, 'null');
+    },
   },
 
   props: {
@@ -172,15 +168,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.lesson-card {
-  border: 0.15rem dashed #52D273;
-};
+.empty-lesson-card {
+  display: inline-block;
+  min-width: 150px;
+  max-width: 500px;
+  height: 110px;
+  margin: 15px;
+  border-radius: 15px;
+  border: 0.15rem dashed $positive;
+  background-color: #464646;
+  cursor: pointer;
+  user-select: none;
+}
 
-.lesson-card__add {
+.empty-lesson-card__icon {
   width: 100%;
   height: 100%;
   font-size: 48px;
-  color: #52D273;
+  color: $positive;
   cursor: pointer;
 }
 </style>

@@ -13,6 +13,10 @@ const actions = {
     commit('SET_SELECTED_SUBJECT', subject);
   },
 
+  setSubjectContent({ commit }, payload) {
+    commit('SET_SUBJECT_CONTENT', payload);
+  },
+
   selectSubject({ commit }, payload) {
     const { select, subject } = payload;
     const subjectStyle = select ? 'selected-node' : 'subject-node';
@@ -28,6 +32,12 @@ const actions = {
 const mutations = {
   SET_SELECTED_SUBJECT(state, subject) {
     state.selectedSubject = subject;
+  },
+
+  SET_SUBJECT_CONTENT(state, payload) {
+    const { subject, content } = payload;
+
+    subject.content = content;
   },
 
   SELECT_SUBJECT(state, payload) {

@@ -1,24 +1,21 @@
 <template>
   <q-layout view="LHh lpR lFf">
     <q-header class="tool-bar__header shadow-3">
-      <q-btn-group class="full-height" spread unelevated>
-        <q-btn
-          class="tool-bar__button"
-          @click="redirectToHome"
-        >Lessons</q-btn>
-        <q-btn class="tool-bar__button">Articles</q-btn>
-        <q-btn class="tool-bar__button">Exercises</q-btn>
-        <q-btn
-          class="tool-bar__button"
-          @click="openDialog"
-        >Settings</q-btn>
+      <q-btn-group
+        class="navigation full-height"
+        spread
+        unelevated
+      >
+        <q-btn @click="redirectToSections">Lessons</q-btn>
+        <q-btn @click="dialog.openDialog({ title: 'Session timer', containerName: 'SessionTimerDialog' })">Session timer</q-btn>
+        <q-btn @click="dialog.openDialog({ title: 'Settings', containerName: 'SettingsDialog' })">Settings</q-btn>
       </q-btn-group>
     </q-header>
     <Dialog
-      :show-dialog.sync="showSettingsDialog"
-      dialog-title="Settings"
-      content-component-name="SettingsDialog"
-      @closeDialog="closeDialog"
+      :show="dialog.show"
+      :title="dialog.title"
+      :container-name="dialog.containerName"
+      @closeDialog="dialog.closeDialog()"
     />
     <q-page-container>
       <router-view />
@@ -28,29 +25,22 @@
 
 <script>
 import Dialog from 'components/dialogs/GenericDialog';
+import DialogModel from 'components/models/dialogModel';
 
 export default {
   name: 'MainLayout',
 
   data() {
     return {
-      showSettingsDialog: false,
+      dialog: new DialogModel(),
     };
   },
 
   methods: {
-    redirectToHome() {
+    redirectToSections() {
       if (this.$router.currentRoute.path !== '/') {
         this.$router.push('/');
       }
-    },
-
-    openDialog() {
-      this.showSettingsDialog = true;
-    },
-
-    closeDialog() {
-      this.showSettingsDialog = false;
     },
   },
 
@@ -58,16 +48,15 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .tool-bar__header {
   height: 51px;
   font-weight: bold;
-  background-color: #333333;
+  background-color: $dark;
 }
 
-.tool-bar__button {
+.navigation > button[type="button"] {
   font-weight: bold;
-  color: #52D273;
+  color: $positive;
 }
-
 </style>

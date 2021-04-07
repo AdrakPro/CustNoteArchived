@@ -8,7 +8,7 @@ const state = {
 };
 
 const getters = {
-  getSectionLessonsBy: (state) => (sectionTitle) => state.sections[sectionTitle].lessons,
+  getLessons: (state) => (title) => state.sections[title].lessons,
 };
 
 const actions = {
@@ -17,7 +17,7 @@ const actions = {
       const dataToNormalize = [];
       for (let i = 0, l = docs.length; i < l; ++i) {
         dataToNormalize.push({
-          sectionTitle: docs[i].sectionTitle,
+          title: docs[i].title,
           lessons: docs[i].lessons.filter((lesson) => lesson !== null),
         });
       }
@@ -59,58 +59,54 @@ const mutations = {
   FETCH_SECTIONS(state, data) {
     const { sections, lessons } = data.entities;
 
-    if (sections !== undefined) {
-      state.sections = sections;
-    }
-
-    if (lessons !== undefined) {
-      state.lessons = lessons;
-    }
+    state.sections = sections || {};
+    state.lessons = lessons || {};
   },
 
   CREATE_EMPTY_SECTION(state) {
     Vue.set(state.sections, null, {
-      sectionTitle: null,
+      title: null,
       lessons: [],
     });
   },
 
-  SET_SECTION(state, sectionTitle) {
+  SET_SECTION(state, title) {
     const section = state.sections[state.previousTitle] || { lessons: [] };
-    section.sectionTitle = sectionTitle;
+
+    section.title = title;
 
     Vue.delete(state.sections, state.previousTitle);
-    Vue.set(state.sections, sectionTitle, section);
+    Vue.set(state.sections, title, section);
   },
 
-  DELETE_SECTION(state, sectionTitle) {
-    const sectionLessons = state.sections[sectionTitle].lessons;
+  DELETE_SECTION(state, title) {
+    const { lessons } = state.sections[title];
 
-    for (let i = 0, l = sectionLessons.length; i < l; ++i) {
-      Vue.delete(state.lessons, sectionLessons[i]);
+    for (let i = 0, l = lessons.length; i < l; ++i) {
+      Vue.delete(state.lessons, lessons[i]);
     }
-    Vue.delete(state.sections, sectionTitle);
+    Vue.delete(state.sections, title);
   },
 
   CREATE_EMPTY_LESSON(state, payload) {
-    const { sectionTitle, lessonId } = payload;
+    const { sectionTitle, id } = payload;
 
     state.sections[sectionTitle].lessons.push(null);
+
     Vue.set(state.lessons, null, {
-      lessonTitle: null,
-      lessonId,
+      title: null,
+      id,
     });
   },
 
   SET_LESSON(state, payload) {
     const { sectionTitle, lessonTitle } = payload;
-
+    const { lessons } = state.sections[sectionTitle];
+    const lessonIndex = lessons.findIndex((title) => title === state.previousTitle);
     const lesson = state.lessons[state.previousTitle] || {};
-    lesson.lessonTitle = lessonTitle;
 
-    const sectionLessons = state.sections[sectionTitle].lessons;
-    const lessonIndex = sectionLessons.findIndex((lessonTitle) => lessonTitle === state.previousTitle);
-    sectionLessons[lessonIndex] = lessonTitle;
+    lessons[lessonIndex] = lessonTitle;
+    lesson.title = lessonTitle;
 
     Vue.delete(state.lessons, state.previousTitle);
     Vue.set(state.lessons, lessonTitle, lesson);
@@ -118,15 +114,14 @@ const mutations = {
 
   DELETE_LESSON(state, payload) {
     const { sectionTitle, lessonTitle } = payload;
+    const { lessons } = state.sections[sectionTitle];
 
-    const sectionLessons = state.sections[sectionTitle].lessons;
-    sectionLessons.splice(sectionLessons.indexOf(lessonTitle), 1);
+    lessons.splice(lessons.indexOf(lessonTitle), 1);
     Vue.delete(state.lessons, lessonTitle);
   },
 
   SET_PREVIOUS_TITLE(state, title) {
     state.previousTitle = title;
-    console.log(state.previousTitle);
   },
 };
 

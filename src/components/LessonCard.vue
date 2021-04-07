@@ -1,26 +1,23 @@
 <template>
-  <div v-if="lesson !== undefined">
-    <q-card class="lesson-card">
-      <div v-if="lesson.lessonTitle === null">
-        <q-input
-          v-model="lessonTitleInput"
-          @keydown.enter="submitLessonTitle"
-          maxlength="16"
-          style="padding: 2vh 1vh 0 1vh"
-          class="lesson-card__input"
-          color="positive"
-          autofocus
-        />
-      </div>
-      <div
-        v-else
-        @click="redirectToNotes(lesson.lessonId)"
-        class="lesson-card__text"
-      >{{ lesson.lessonTitle }}
-        <Menu :menu-items="menuItems" />
-      </div>
-    </q-card>
-  </div>
+  <q-card
+    class="lesson-card"
+    @click="redirectToSubjects(lesson.id)"
+  >
+    <q-input
+      v-if="lesson.title === null"
+      v-model="titleInput"
+      @keydown.enter="submitLesson"
+      maxlength="16"
+      style="padding: 2vh 1vh 0 1vh"
+      color="positive"
+      autofocus
+    />
+    <div
+      v-else
+    >{{ lesson.title }}
+      <Menu :menu-items="menuItems" />
+    </div>
+  </q-card>
 </template>
 
 <script>
@@ -31,14 +28,13 @@ export default {
 
   data() {
     return {
-      lessonTitleInput: '',
+      titleInput: '',
     };
   },
 
   methods: {
-    /* If redirecting is not disabled, redirect to LessonPage.vue with lessonId param */
-    redirectToNotes(lessonId) {
-      if (!this.isRedirectingDisabled) {
+    redirectToSubjects(lessonId) {
+      if (this.isRedirectingEnabled) {
         this.$router.push({
           name: 'lesson',
           params: { lessonId },
@@ -46,18 +42,17 @@ export default {
       }
     },
 
-    /* Emit submitLessonTitle with input value */
-    submitLessonTitle() {
-      this.$emit('submitLessonTitle', this.lessonTitleInput);
+    submitLesson() {
+      this.$emit('submitLesson', this.titleInput);
     },
   },
 
   props: {
     lesson: Object,
     menuItems: Array,
-    isRedirectingDisabled: {
+    isRedirectingEnabled: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
 
@@ -65,19 +60,25 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.lesson-card__text {
+<style lang="scss">
+.lesson-card {
+  display: inline-block;
+  min-width: 150px;
+  max-width: 500px;
+  height: 110px;
+  margin: 15px;
+  border-radius: 15px;
+  border: 0.15rem solid $positive;
+  background-color: #464646;
+  cursor: pointer;
+  user-select: none;
+}
+
+.lesson-card > div {
+  height: 30px;
   padding: 15px 15px 0 15px;
   font-size: 54px;
   text-align: center;
-  color: #52D273;
-}
-
-.lesson-card__input input {
-  height: 30px;
-  text-align: center;
-  font-size: 40px;
-  font-weight: bold;
-  color: #52D273;
+  color: $positive;
 }
 </style>
