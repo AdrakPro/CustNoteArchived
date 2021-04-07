@@ -209,6 +209,7 @@ export default {
 
     persistSubjectContent(subject) {
       const { id } = subject;
+      console.log(subject);
 
       if (id !== null) {
         const content = this.editor.getHTML();

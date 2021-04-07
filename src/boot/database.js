@@ -5,6 +5,7 @@ import { RxDBKeyCompressionPlugin } from 'rxdb/plugins/key-compression';
 import { RxDBValidateZSchemaPlugin } from 'rxdb/plugins/validate-z-schema';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 import { RxDBJsonDumpPlugin } from 'rxdb/plugins/json-dump';
+import router from '../router/index';
 
 const sectionSchema = {
   keyCompression: true,
@@ -100,7 +101,8 @@ function importDb(jsonDb) {
       .then(() => createDb()
         .then((db) => {
           db.importDump(jsonDb)
-            .then(() => window.location.reload());
+            .then(() => router().push('/')
+              .then(() => window.location.reload()));
         }));
   });
 }

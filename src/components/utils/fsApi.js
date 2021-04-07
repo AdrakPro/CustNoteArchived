@@ -5,6 +5,13 @@ import { exportDb, importDb } from 'boot/database';
 
 const defaultBackupDir = path.join(remote.app.getPath('userData'), 'Backups');
 
+// It is good solution hmmm?
+function catchError(err) {
+  if (err) {
+    throw err;
+  }
+}
+
 /* Read dir and get JSON backups names */
 async function getBackupsNames() {
   return new Promise((resolve, reject) => {
@@ -49,16 +56,17 @@ async function writeBackup() {
   const backupContent = JSON.stringify(await exportDb().then((content) => content));
 
   await fs.stat(defaultBackupDir, (err) => {
-    if (err) {
-      fs.mkdir(defaultBackupDir, null);
-    } else {
+    if (!err) {
       getBackupsNames().then((backupsNames) => {
         if (backupsNames.length > 20) {
-          fs.unlink(path.join(defaultBackupDir, backupsNames[0]), null);
+          // Delete first file in dir
+          fs.unlink(path.join(defaultBackupDir, backupsNames[0]), (err) => catchError(err));
         }
 
-        fs.writeFile(backupPath, backupContent, 'UTF-8', null);
+        fs.writeFile(backupPath, backupContent, 'UTF-8', (err) => catchError(err));
       });
+    } else {
+      fs.mkdir(defaultBackupDir, (err) => catchError(err));
     }
   });
 }
