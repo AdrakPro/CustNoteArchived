@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import sectionStore from './sectionStore';
 import menuStore from './menuStore';
 import editorStore from './editorStore';
+import timerStore from './timerStore';
 
 Vue.use(Vuex);
 
@@ -22,6 +23,7 @@ export default function (/* { ssrContext } */) {
       sectionStore,
       editorStore,
       menuStore,
+      timerStore,
     },
 
     // enable strict mode (adds overhead!)

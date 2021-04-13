@@ -41,7 +41,11 @@ export default {
     // Updates katex-render with node textContent.
     render(textContent) {
       katex.render(textContent, this.$refs.render, {
-        throwOnError: false, displayMode: false,
+        throwOnError: false,
+        displayMode: false,
+        macros: {
+          '\\s': '\\displaystyle\\sum_{#1}^{#2}',
+        },
       });
     },
     // Shows katex-render and hides katex-editor when selection is on parent.
@@ -63,9 +67,7 @@ export default {
   },
 
   watch: {
-    'node.textContent': (textContent) => {
-      this.render(textContent);
-    },
+    'node.textContent': (textContent) => this.render(textContent),
   },
 
   props: ['node', 'view', 'getPos'],

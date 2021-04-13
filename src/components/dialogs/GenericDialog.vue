@@ -15,10 +15,12 @@
         />
       </q-bar>
       <div v-if="containerName !== null">
-        <component
-          :is="contentComponent"
-          :dialog-title="title"
-        />
+        <keep-alive>
+          <component
+            :is="contentComponent"
+            :dialog-title="title"
+          />
+        </keep-alive>
       </div>
     </div>
   </q-dialog>

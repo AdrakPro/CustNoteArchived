@@ -6,9 +6,18 @@
         spread
         unelevated
       >
-        <q-btn @click="redirectToSections">Lessons</q-btn>
-        <q-btn @click="dialog.openDialog({ title: 'Session timer', containerName: 'SessionTimerDialog' })">Session timer</q-btn>
-        <q-btn @click="dialog.openDialog({ title: 'Settings', containerName: 'SettingsDialog' })">Settings</q-btn>
+        <q-btn
+          label="Lessons"
+          @click="redirectToSections"
+        />
+        <q-btn
+          label="Session timer"
+          @click="dialog.openDialog({ title: 'Session timer', containerName: 'SessionTimerDialog' })"
+        />
+        <q-btn
+          label="Settings"
+          @click="dialog.openDialog({ title: 'Settings', containerName: 'SettingsDialog' })"
+        />
       </q-btn-group>
     </q-header>
     <Dialog

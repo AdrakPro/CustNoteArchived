@@ -1,8 +1,8 @@
 <template>
   <q-page class="row">
     <div class="parent-container">
-      <LessonTree></LessonTree>
-      <NoteEditor></NoteEditor>
+      <LessonTree />
+      <NoteEditor />
     </div>
   </q-page>
 </template>

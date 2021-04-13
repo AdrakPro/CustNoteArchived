@@ -207,9 +207,9 @@ export default {
       });
     },
 
+    // Unfixed bug => deleting selected subject content null
     persistSubjectContent(subject) {
       const { id } = subject;
-      console.log(subject);
 
       if (id !== null) {
         const content = this.editor.getHTML();
@@ -267,10 +267,12 @@ export default {
 
   watch: {
     selectedSubject(nextSubject, previousSubject) {
-      this.unselectSubject(previousSubject);
-      this.persistSubjectContent(previousSubject);
-      this.setEditorContent(nextSubject.content);
-      this.editor.focus();
+      if (this.selectedSubject.id !== null) {
+        this.unselectSubject(previousSubject);
+        this.persistSubjectContent(previousSubject);
+        this.setEditorContent(nextSubject.content);
+        this.editor.focus();
+      }
     },
   },
 
@@ -317,29 +319,25 @@ export default {
     ol,
     pre,
     ul {
-      margin: 0.5rem 0
+      margin-bottom: 0;
     }
 
     blockquote:first-child,
     h1:first-child,
-    h2:first-child,
-    h3:first-child,
     ol:first-child,
     p:first-child,
     pre:first-child,
     ul:first-child {
-      margin-top: 0
+      margin-top: 0;
     }
 
     blockquote:last-child,
     h1:last-child,
-    h2:last-child,
-    h3:last-child,
     ol:last-child,
     p:last-child,
     pre:last-child,
     ul:last-child {
-      margin-bottom: 0
+      margin-bottom: 0;
     }
 
     p {
@@ -357,9 +355,18 @@ export default {
 
     img {
       display: inline-block;
+      margin: 10px 0 10px 0;
       max-width: 400px;
       max-height: 400px;
       border-radius: 5px;
+    }
+
+    highlight {
+      display: inline-block;
+      margin: 10px 0 10px 0;
+      padding: 0 2px 0 2px;
+      background-color: $dark;
+      color: $positive;
     }
 
     pre {
@@ -453,7 +460,11 @@ export default {
       list-style: none;
 
       li {
-        margin-bottom: 4px;
+        margin-bottom: 5px;
+      }
+
+      li:last-child {
+        margin-bottom: 10px;
       }
     }
 

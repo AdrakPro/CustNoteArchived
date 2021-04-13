@@ -10,13 +10,11 @@ export default class HighlightText extends Mark {
     return {
       parseDOM: [
         {
-          tag: 'mark',
+          tag: 'highlight',
         },
       ],
       toDOM: () => [
-        'mark', {
-          style: 'color: #52D273; padding: 1px; background: #333333',
-        }, 0,
+        'highlight', 0,
       ],
     };
   }

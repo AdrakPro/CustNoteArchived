@@ -19,7 +19,7 @@
         name="backups"
         class="column no-wrap"
       >
-        <BackupTable></BackupTable>
+        <BackupTable />
       </q-carousel-slide>
     </q-carousel>
   </div>

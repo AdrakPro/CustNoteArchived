@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeTheme } from 'electron';
+import { app, BrowserWindow, nativeTheme, ipcMain } from 'electron';
 import fs from 'fs';
 import path from 'path';
 
@@ -42,10 +42,14 @@ function createWindow() {
   mainWindow.setMenu(null);
   mainWindow.loadURL(process.env.APP_URL);
 
+  mainWindow.once('focus', () => mainWindow.flashFrame(false));
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
+
+ipcMain.on('flash-icon', () => mainWindow.flashFrame(true));
 
 app.on('ready', createWindow);
 
