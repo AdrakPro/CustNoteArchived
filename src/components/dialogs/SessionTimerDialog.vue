@@ -124,7 +124,7 @@ export default {
     },
 
     removeBreakPointsFromProgressBarWhenTimerExpires() {
-      if (this.progress === 1) {
+      if (this.timeSpent === this.totalTime) {
         this.removeBreakPointsFromProgressBar();
       }
     },
@@ -165,6 +165,7 @@ export default {
       sessions: (state) => state.sessions,
       timerText: (state) => state.timerText,
       totalTime: (state) => state.totalTime,
+      timeSpent: (state) => state.timeSpent,
       progress: (state) => state.progress,
       isTimerNotPaused: (state) => state.isTimerNotPaused,
     }),
