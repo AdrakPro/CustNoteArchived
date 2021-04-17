@@ -1,8 +1,8 @@
 <template>
   <div>
     <div
-      v-if="inputTime === null"
-      @click="resetInput"
+      v-if="isInputDisabled"
+      @click="switchInputDisabling"
       ref="timer"
       class="timer"
     >0:0:0</div>
@@ -20,7 +20,7 @@
       autofocus
     />
     <q-linear-progress
-      :value="progressBar"
+      :value="progress"
       ref="progressBar"
       class="progress-bar"
     />
@@ -30,12 +30,13 @@
       class="timer-buttons"
     >
       <q-btn
-        v-if="progressBar === 0"
+        v-if="isTimerNotStarted"
         @click="startTimer"
         icon="mdi-play"
       />
       <q-btn
-        icon="mdi-pause"
+        v-else
+        :icon="isTimerNotPaused ? 'mdi-pause' : 'mdi-play'"
         @click="pauseTimer"
       />
       <q-btn
@@ -45,15 +46,19 @@
     </q-btn-group>
   </div>
 </template>
+
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 
 export default {
   name: 'SessionTimerDialog',
 
   data() {
     return {
-      inputTime: null,
+      inputTime: '',
+      progress: 0,
+      totalTime: 0,
+      isInputDisabled: true,
     };
   },
 
@@ -63,38 +68,80 @@ export default {
 
   methods: {
     startTimer() {
-      if (this.isSessionNotSubmitted()) {
-        return;
+      if (this.areSessionsExist) {
+        this.switchInputDisabling();
+        this.setTotalTime();
+        this.attachBreakPointsToProgressBar();
+        this.$store.dispatch('timerStore/startTimer');
       }
-
-      this.disableInput();
-      this.$store.dispatch('timerStore/startTimer');
-    },
-
-    stopTimer() {
-      this.$store.dispatch('timerStore/stopTimer');
-      this.removeBreakPointsFromProgressBar();
     },
 
     pauseTimer() {
-      this.$store.dispatch('timerStore/switchPausingTimer');
-    },
-
-    submitSession() {
-      const time = this.parseInputTimeToMs();
-
-      this.resetInput();
-      this.$store.dispatch('timerStore/addSession', time);
-      this.attachBreakPointsToProgressBar();
-    },
-
-    stopTimerWhenExpired() {
-      if (this.timeSpent === this.totalTime) {
-        this.stopTimer();
+      if (this.isTimerStarted) {
+        this.$store.dispatch('timerStore/switchPausingTimer');
       }
     },
 
-    updateTimerText() {
+    stopTimer() {
+      if (this.isTimerStarted) {
+        this.$store.dispatch('timerStore/stopTimer');
+        this.setTimerText('0:0:0');
+        this.removeBreakPointsFromProgressBar();
+        this.resetProgressBar();
+      }
+    },
+
+    stopTimerWhenExpired() {
+      if (this.isTimerExpired) {
+        this.stopTimer();
+        this.flashIcon();
+      }
+    },
+
+    submitSession() {
+      const time = this.parseStringTimeToMs();
+
+      this.resetInput();
+      this.$store.dispatch('timerStore/addSession', time);
+    },
+
+    attachBreakPointsToProgressBar() {
+      const progressBar = this.$refs.progressBar.$el;
+
+      for (let i = 0, l = this.sessions.length; i < l; ++i) {
+        const breakPoint = document.createElement('div');
+        const sessionTime = i !== 0 ? this.sessions[i - 1] + this.sessions[i] : this.sessions[i];
+
+        breakPoint.classList.add('breakpoint');
+        breakPoint.style.left = `${(sessionTime / this.totalTime) * progressBar.clientWidth}px`;
+
+        progressBar.appendChild(breakPoint);
+      }
+    },
+
+    flashIconWhenEnterBreakPoint() {
+      const currentSession = this.sessions[0];
+
+      if (currentSession === this.timeSpent) {
+        this.$store.dispatch('timerStore/shiftSession');
+        this.flashIcon();
+      }
+    },
+
+    removeBreakPointsFromProgressBar() {
+      const progressBar = this.$refs.progressBar.$el;
+      const breakPoints = progressBar.getElementsByClassName('breakpoint');
+
+      while (breakPoints.length > 0) {
+        progressBar.removeChild(breakPoints[0]);
+      }
+    },
+
+    updateProgressBar() {
+      this.progress = this.timeSpent / this.totalTime;
+    },
+
+    updateTimer() {
       let seconds = (this.totalTime - this.timeSpent) / this.second;
       // 3,600 seconds in 1 hour
       const hours = Math.floor(seconds / 3600);
@@ -105,47 +152,26 @@ export default {
       // Keep only seconds not extracted to minutes:
       seconds %= 60;
 
-      const timerText = this.$refs.timer;
-
-      if (timerText !== undefined) {
-        timerText.innerText = `${hours}:${minutes}:${seconds}`;
+      if (this.areSessionsExist) {
+        this.setTimerText(`${hours}:${minutes}:${seconds}`);
       }
     },
 
-    attachBreakPointsToProgressBar() {
-      const progressBar = this.$refs.progressBar.$el;
-      const breakPoint = document.createElement('div');
-      const lastSessionIndex = this.sessions.length - 1;
+    setTimerText(text) {
+      const { timer } = this.$refs;
 
-      breakPoint.classList.add('breakpoint');
-      breakPoint.style.left = `${(this.sessions[lastSessionIndex] / this.totalTime) * progressBar.clientWidth}px`;
-
-      progressBar.appendChild(breakPoint);
+      timer.innerText = text;
     },
 
-    alertWhenEnterBreakpoint() {
-      const lastSessionIndex = this.sessions.length - 1;
-
-      if (this.sessions[lastSessionIndex] === this.timeSpent) {
-        this.$q.electron.ipcRenderer.send('flash-icon');
-        this.$store.dispatch('timerStore/popSession');
-      }
+    setTotalTime() {
+      this.totalTime = this.sessions.reduce((a, b) => a + b, 0);
     },
 
-    removeBreakPointsFromProgressBar() {
-      const progressBar = this.$refs.progressBar.$el;
-      const breakpoints = progressBar.getElementsByClassName('breakpoint');
-
-      while (breakpoints.length > 0) {
-        progressBar.removeChild(breakpoints[0]);
-      }
+    flashIcon() {
+      this.$q.electron.ipcRenderer.send('flash-icon');
     },
 
-    isSessionNotSubmitted() {
-      return this.totalTime === 0 || this.inputTime === null;
-    },
-
-    parseInputTimeToMs() {
+    parseStringTimeToMs() {
       const time = this.inputTime.split(':');
       const convertingTable = [
         3600 * this.second, // hours
@@ -161,49 +187,69 @@ export default {
       return summedMs;
     },
 
+    switchInputDisabling() {
+      if (this.isTimerNotStarted) {
+        this.isInputDisabled = !this.isInputDisabled;
+      }
+    },
+
     resetInput() {
       this.inputTime = '';
     },
 
-    disableInput() {
-      this.inputTime = null;
+    resetProgressBar() {
+      this.progress = 0;
     },
   },
 
   computed: {
     ...mapState('timerStore', {
-      progressBar: (state) => state.progressBar,
-      timeSpent: (state) => state.timeSpent,
       sessions: (state) => state.sessions,
+      timeSpent: (state) => state.timeSpent,
+      isTimerNotPaused: (state) => state.isTimerNotPaused,
     }),
 
-    ...mapGetters('timerStore', {
-      totalTime: 'totalTime',
-    }),
+    areSessionsExist() {
+      return this.sessions.length !== 0;
+    },
+
+    isTimerNotStarted() {
+      return this.progress === 0;
+    },
+
+    isTimerStarted() {
+      return this.progress !== 0;
+    },
+
+    isTimerExpired() {
+      return this.progress === 1;
+    },
   },
 
   watch: {
     timeSpent() {
+      this.flashIconWhenEnterBreakPoint();
+      this.updateProgressBar();
+      this.updateTimer();
       this.stopTimerWhenExpired();
-      this.alertWhenEnterBreakpoint();
-      this.updateTimerText();
     },
   },
 };
 </script>
+
 <style lang="scss">
 .timer {
   display: flex;
   justify-content: center;
   flex-wrap: nowrap;
-
   margin: 15px;
   font-size: 48px;
   cursor: pointer;
+  user-select: none;
 
-  &:hover {
-    opacity: 0.76;
-    transition: opacity 0.3s ease-out;
+&:hover {
+   opacity: 0.76;
+   transition: opacity 0.3s ease-out;
   }
 }
 
@@ -217,6 +263,14 @@ export default {
 
 .timer-buttons > button[type="button"] {
   color: $positive;
+
+  &:first-child {
+    margin-left: 5px;
+  }
+
+  &:last-child {
+    margin-right: 5px;
+  }
 }
 
 .breakpoint {

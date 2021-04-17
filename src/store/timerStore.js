@@ -1,36 +1,25 @@
 const getDefaultState = () => ({
   timer: null,
-  progressBar: 0,
-  timeSpent: 0,
   sessions: [],
+  timeSpent: 0,
   isTimerNotPaused: true,
 });
 
-const SECOND = 1000;
+const second = 1000;
 
 const state = getDefaultState();
 
-const getters = {
-  totalTime: (state) => state.sessions.reduce((a, b) => a + b, 0),
-};
-
 const actions = {
-  setTimer({ commit }, timer) {
-    commit('SET_TIMER', timer);
-  },
-
   stopTimer({ commit }) {
     commit('STOP_TIMER');
-    commit('RESET_TIMER');
   },
 
   startTimer({ commit }) {
     const timer = setInterval(() => {
       if (state.isTimerNotPaused) {
         commit('INCREMENT_TIME');
-        commit('UPDATE_PROGRESS_BAR');
       }
-    }, SECOND);
+    }, second);
 
     commit('SET_TIMER', timer);
   },
@@ -39,16 +28,12 @@ const actions = {
     commit('ADD_SESSION', time);
   },
 
-  popSession({ commit }) {
-    commit('POP_SESSION');
+  shiftSession({ commit }) {
+    commit('SHIFT_SESSION');
   },
 
   switchPausingTimer({ commit }) {
     commit('SWITCH_PAUSING_TIMER');
-  },
-
-  resetTimer({ commit }) {
-    commit('RESET_TIMER');
   },
 };
 
@@ -59,39 +44,30 @@ const mutations = {
 
   STOP_TIMER(state) {
     clearInterval(state.timer);
+    Object.assign(state, getDefaultState());
   },
 
   INCREMENT_TIME(state) {
-    state.timeSpent += SECOND;
-  },
-
-  UPDATE_PROGRESS_BAR(state) {
-    const totalTime = state.sessions.reduce((a, b) => a + b, 0);
-
-    state.progressBar = state.timeSpent / totalTime;
-  },
-
-  SWITCH_PAUSING_TIMER(state) {
-    state.isTimerNotPaused = !state.isTimerNotPaused;
+    state.timeSpent += second;
   },
 
   ADD_SESSION(state, time) {
     state.sessions.push(time);
   },
 
-  POP_SESSION(state) {
-    state.sessions.pop();
+  SHIFT_SESSION(state) {
+    state.sessions.shift();
   },
 
-  RESET_TIMER(state) {
-    Object.assign(state, getDefaultState());
+  SWITCH_PAUSING_TIMER(state) {
+    state.isTimerNotPaused = !state.isTimerNotPaused;
   },
+
 };
 
 export default {
   namespaced: true,
   state,
-  getters,
   actions,
   mutations,
 };
