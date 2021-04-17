@@ -68,6 +68,7 @@ export default {
   background-color: $primary;
   color: $white;
   text-align: center;
+  user-select: none;
 
   table th {
     color: $positive;

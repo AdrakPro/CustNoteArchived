@@ -5,7 +5,7 @@
       @click="switchInputDisabling"
       ref="timer"
       class="timer"
-    >0:0:0</div>
+    >{{ timerText }}</div>
     <q-input
       v-else
       v-model="inputTime"
@@ -56,14 +56,18 @@ export default {
   data() {
     return {
       inputTime: '',
-      progress: 0,
-      totalTime: 0,
       isInputDisabled: true,
     };
   },
 
   created() {
     this.second = 1000;
+  },
+
+  mounted() {
+    if (this.progress !== 0) {
+      this.attachBreakPointsToProgressBar();
+    }
   },
 
   methods: {
@@ -85,16 +89,7 @@ export default {
     stopTimer() {
       if (this.isTimerStarted) {
         this.$store.dispatch('timerStore/stopTimer');
-        this.setTimerText('0:0:0');
         this.removeBreakPointsFromProgressBar();
-        this.resetProgressBar();
-      }
-    },
-
-    stopTimerWhenExpired() {
-      if (this.isTimerExpired) {
-        this.stopTimer();
-        this.flashIcon();
       }
     },
 
@@ -119,15 +114,6 @@ export default {
       }
     },
 
-    flashIconWhenEnterBreakPoint() {
-      const currentSession = this.sessions[0];
-
-      if (currentSession === this.timeSpent) {
-        this.$store.dispatch('timerStore/shiftSession');
-        this.flashIcon();
-      }
-    },
-
     removeBreakPointsFromProgressBar() {
       const progressBar = this.$refs.progressBar.$el;
       const breakPoints = progressBar.getElementsByClassName('breakpoint');
@@ -137,38 +123,14 @@ export default {
       }
     },
 
-    updateProgressBar() {
-      this.progress = this.timeSpent / this.totalTime;
-    },
-
-    updateTimer() {
-      let seconds = (this.totalTime - this.timeSpent) / this.second;
-      // 3,600 seconds in 1 hour
-      const hours = Math.floor(seconds / 3600);
-      // Seconds remaining after extracting hours
-      seconds %= 3600;
-      // 60 seconds in 1 minute
-      const minutes = Math.floor(seconds / 60);
-      // Keep only seconds not extracted to minutes:
-      seconds %= 60;
-
-      if (this.areSessionsExist) {
-        this.setTimerText(`${hours}:${minutes}:${seconds}`);
+    removeBreakPointsFromProgressBarWhenTimerExpires() {
+      if (this.progress === 1) {
+        this.removeBreakPointsFromProgressBar();
       }
     },
 
-    setTimerText(text) {
-      const { timer } = this.$refs;
-
-      timer.innerText = text;
-    },
-
     setTotalTime() {
-      this.totalTime = this.sessions.reduce((a, b) => a + b, 0);
-    },
-
-    flashIcon() {
-      this.$q.electron.ipcRenderer.send('flash-icon');
+      this.$store.dispatch('timerStore/setTotalTime');
     },
 
     parseStringTimeToMs() {
@@ -196,16 +158,14 @@ export default {
     resetInput() {
       this.inputTime = '';
     },
-
-    resetProgressBar() {
-      this.progress = 0;
-    },
   },
 
   computed: {
     ...mapState('timerStore', {
       sessions: (state) => state.sessions,
-      timeSpent: (state) => state.timeSpent,
+      timerText: (state) => state.timerText,
+      totalTime: (state) => state.totalTime,
+      progress: (state) => state.progress,
       isTimerNotPaused: (state) => state.isTimerNotPaused,
     }),
 
@@ -220,18 +180,11 @@ export default {
     isTimerStarted() {
       return this.progress !== 0;
     },
-
-    isTimerExpired() {
-      return this.progress === 1;
-    },
   },
 
   watch: {
-    timeSpent() {
-      this.flashIconWhenEnterBreakPoint();
-      this.updateProgressBar();
-      this.updateTimer();
-      this.stopTimerWhenExpired();
+    timerText() {
+      this.removeBreakPointsFromProgressBarWhenTimerExpires();
     },
   },
 };

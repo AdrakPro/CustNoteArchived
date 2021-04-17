@@ -2,6 +2,9 @@ const getDefaultState = () => ({
   timer: null,
   sessions: [],
   timeSpent: 0,
+  totalTime: 0,
+  progress: 0,
+  timerText: '0:0:0',
   isTimerNotPaused: true,
 });
 
@@ -18,18 +21,30 @@ const actions = {
     const timer = setInterval(() => {
       if (state.isTimerNotPaused) {
         commit('INCREMENT_TIME');
+        commit('UPDATE_PROGRESS_BAR');
+        commit('UPDATE_TIMER');
+      }
+
+      if (state.sessions[0] === state.timeSpent) {
+        commit('SHIFT_SESSION');
+        this._vm.$q.electron.ipcRenderer.send('flash-icon');
+      }
+
+      if (state.progress === 1) {
+        commit('STOP_TIMER');
+        this._vm.$q.electron.ipcRenderer.send('flash-icon');
       }
     }, second);
 
     commit('SET_TIMER', timer);
   },
 
-  addSession({ commit }, time) {
-    commit('ADD_SESSION', time);
+  setTotalTime({ commit }) {
+    commit('SET_TOTAL_TIME');
   },
 
-  shiftSession({ commit }) {
-    commit('SHIFT_SESSION');
+  addSession({ commit }, time) {
+    commit('ADD_SESSION', time);
   },
 
   switchPausingTimer({ commit }) {
@@ -49,6 +64,30 @@ const mutations = {
 
   INCREMENT_TIME(state) {
     state.timeSpent += second;
+  },
+
+  UPDATE_PROGRESS_BAR(state) {
+    state.progress = state.timeSpent / state.totalTime;
+  },
+
+  UPDATE_TIMER(state) {
+    let seconds = (state.totalTime - state.timeSpent) / second;
+    // 3,600 seconds in 1 hour
+    const hours = Math.floor(seconds / 3600);
+    // Seconds remaining after extracting hours
+    seconds %= 3600;
+    // 60 seconds in 1 minute
+    const minutes = Math.floor(seconds / 60);
+    // Keep only seconds not extracted to minutes:
+    seconds %= 60;
+
+    if (state.sessions.length !== 0) {
+      state.timerText = `${hours}:${minutes}:${seconds}`;
+    }
+  },
+
+  SET_TOTAL_TIME(state) {
+    state.totalTime = state.sessions.reduce((a, b) => a + b, 0);
   },
 
   ADD_SESSION(state, time) {
