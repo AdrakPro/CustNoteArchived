@@ -65,9 +65,7 @@ export default {
   },
 
   mounted() {
-    if (this.progress !== 0) {
-      this.attachBreakPointsToProgressBar();
-    }
+    this.attachBreakPointsOnMounted();
   },
 
   methods: {
@@ -111,6 +109,12 @@ export default {
         breakPoint.style.left = `${(sessionTime / this.totalTime) * progressBar.clientWidth}px`;
 
         progressBar.appendChild(breakPoint);
+      }
+    },
+
+    attachBreakPointsOnMounted() {
+      if (this.isTimerStarted) {
+        this.attachBreakPointsToProgressBar();
       }
     },
 

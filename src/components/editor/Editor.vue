@@ -460,7 +460,7 @@ export default {
       list-style: none;
 
       li {
-        margin-bottom: 5px;
+        margin-bottom: 8.5px;
       }
 
       li:last-child {

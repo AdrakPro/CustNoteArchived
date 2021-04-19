@@ -25,14 +25,25 @@ const actions = {
         commit('UPDATE_TIMER');
       }
 
-      if (state.sessions[0] === state.timeSpent) {
+      const { electron, notify } = this._vm.$q;
+      const sendNotification = (color, message) => {
+        electron.ipcRenderer.send('flash-icon');
+        notify({
+          color,
+          textColor: 'white',
+          message,
+          timeout: 4 * second,
+        });
+      };
+
+      if (state.sessions[0] === state.timeSpent && state.timeSpent !== state.totalTime) {
         commit('SHIFT_SESSION');
-        this._vm.$q.electron.ipcRenderer.send('flash-icon');
+        sendNotification('info', 'Session ended!');
       }
 
       if (state.progress === 1) {
         commit('STOP_TIMER');
-        this._vm.$q.electron.ipcRenderer.send('flash-icon');
+        sendNotification('warning', 'All sessions have been ended!');
       }
     }, second);
 
