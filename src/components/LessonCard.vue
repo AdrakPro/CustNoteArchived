@@ -7,7 +7,7 @@
       v-if="lesson.title === null"
       v-model="titleInput"
       @keydown.enter="submitLesson"
-      maxlength="16"
+      maxlength="24"
       style="padding: 2vh 1vh 0 1vh"
       color="positive"
       autofocus
@@ -64,7 +64,7 @@ export default {
 .lesson-card {
   display: inline-block;
   min-width: 150px;
-  max-width: 500px;
+  max-width: 700px;
   height: 110px;
   margin: 15px;
   border-radius: 15px;
@@ -77,7 +77,7 @@ export default {
 .lesson-card > div {
   height: 30px;
   padding: 15px 15px 0 15px;
-  font-size: 54px;
+  font-size: 48px;
   text-align: center;
   color: $positive;
 }

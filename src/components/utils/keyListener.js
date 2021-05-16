@@ -3,6 +3,7 @@ class KeyListener {
     this.boundListener = null;
   }
 
+  // add bulk key listeners
   addKeyListener(key, fn, vmToBind) {
     this.keyListener = ((e) => {
       if (e.key === key && (e.ctrlKey || e.metaKey)) {

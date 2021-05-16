@@ -1,14 +1,8 @@
 import { InputRule } from 'prosemirror-inputrules';
 import { Node } from 'tiptap';
-
 import MathView from 'components/editor/extensions/math/MathView';
-
-import './math.css';
 import { deleteMath } from './mathKeymaps.js';
 
-/*
- * Defines a ComponentView for Math.
- */
 export default class Math extends Node {
   get name() {
     return 'math';
@@ -37,7 +31,7 @@ export default class Math extends Node {
 
   inputRules({ type, getAttrs }) {
     return [
-      new InputRule(/(?:\$)([^$\s]+(?:\s+[^$\s]+)*)(?:\$)$/, (state, match, start, end) => {
+      new InputRule(/\$([^$\s]+(?:\s+[^$\s]+)*)\$$/, (state, match, start, end) => {
         const attrs = getAttrs instanceof Function ? getAttrs(match) : getAttrs;
         const [matchedText, content] = match;
         const { tr, schema } = state;

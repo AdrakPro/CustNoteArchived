@@ -9,79 +9,60 @@
       v-slot="{ commands, isActive }"
     >
       <div class="menubar">
-        <div class="menubar__group">
-          <q-btn
-            :class="{ 'is-active': isActive.bold() }"
-            @click="commands.bold"
-            icon="mdi-format-bold"
-            unelevated
-          />
-          <q-btn
-            :class="{ 'is-active': isActive.italic() }"
-            @click="commands.italic"
-            icon="mdi-format-italic"
-            unelevated
-          />
-          <q-btn
-            :class="{ 'is-active': isActive.highlight_text() }"
-            @click="commands.highlight_text"
-            icon="mdi-format-color-highlight"
-            unelevated
-          />
-        </div>
-        <div class="menubar__group">
-          <q-btn
-            :class="{ 'is-active': isActive.heading({ level: 1}) }"
-            @click="commands.heading({ level: 1})"
-            icon="mdi-format-title"
-            unelevated
-          />
-          <q-btn
-            :class="{ 'is-active': isActive.bullet_list() }"
-            @click="commands.bullet_list"
-            icon="mdi-format-list-bulleted"
-            unelevated
-          />
-          <q-btn
-            :class="{ 'is-active': isActive.ordered_list() }"
-            @click="commands.ordered_list"
-            icon="mdi-format-list-numbered"
-            unelevated
-          />
-          <q-btn
-            :class="{ 'is-active': isActive.blockquote() }"
-            @click="commands.blockquote"
-            icon="mdi-format-quote-close"
-            unelevated
-          />
-          <q-btn
-            :class="{ 'is-active': isActive.code_block() }"
-            @click="commands.code_block"
-            icon="mdi-code-tags"
-            unelevated
-          />
-          <q-btn
-            @click="showImagePrompt(commands.image)"
-            icon="mdi-image"
-            unelevated
-          />
-          <q-btn
-            v-if="!isActive.table()"
-            @click="commands.createTable({ rowsCount: 2, colsCount: 2, withHeaderRow: true })"
-            icon="mdi-table"
-            unelevated
-          />
-          <q-btn
-            v-else
-            @click="commands.deleteTable"
-            icon="mdi-table-remove"
-            unelevated
-          />
-        </div>
-        <div
-          v-if="isActive.table()"
-          class="menubar__group"
-        >
+        <q-btn
+          :class="{ 'is-active': isActive.bold() }"
+          @click="commands.bold"
+          icon="mdi-format-bold"
+          unelevated
+        />
+        <q-btn
+          :class="{ 'is-active': isActive.highlight_text() }"
+          @click="commands.highlight_text"
+          icon="mdi-format-color-highlight"
+          unelevated
+        />
+        <q-btn
+          :class="{ 'is-active': isActive.heading({ level: 1}) }"
+          @click="commands.heading({ level: 1})"
+          icon="mdi-format-title"
+          unelevated
+        />
+        <q-btn
+          :class="{ 'is-active': isActive.bullet_list() }"
+          @click="commands.bullet_list"
+          icon="mdi-format-list-bulleted"
+          unelevated
+        />
+        <q-btn
+          :class="{ 'is-active': isActive.ordered_list() }"
+          @click="commands.ordered_list"
+          icon="mdi-format-list-numbered"
+          unelevated
+        />
+        <q-btn
+          :class="{ 'is-active': isActive.code_block() }"
+          @click="commands.code_block"
+          icon="mdi-code-tags"
+          unelevated
+        />
+        <q-btn
+          @click="showImagePrompt(commands.image)"
+          icon="mdi-image"
+          unelevated
+        />
+        <q-btn
+          v-if="!isActive.table()"
+          @click="commands.createTable({ rowsCount: 2, colsCount: 2, withHeaderRow: true })"
+          icon="mdi-table"
+          unelevated
+        />
+        <q-btn
+          v-else
+          @click="commands.deleteTable"
+          icon="mdi-table-remove"
+          unelevated
+        />
+        <div v-if="isActive.table()">
           <q-btn
             @click="commands.addColumnBefore"
             icon="mdi-table-column-plus-before"
@@ -131,7 +112,6 @@ import { mapState } from 'vuex';
 import { DatabaseApi, SUBJECTS, SUBJECTS_PRIMARY_KEY } from 'components/utils/databaseApi';
 import { Editor, EditorContent, EditorMenuBar } from 'tiptap';
 import {
-  Blockquote,
   Bold,
   BulletList,
   CodeBlock,
@@ -140,7 +120,6 @@ import {
   Heading,
   History,
   Image,
-  Italic,
   ListItem,
   OrderedList,
   Table,
@@ -184,7 +163,6 @@ export default {
           new Heading({ levels: [1] }),
           new BulletList(),
           new OrderedList(),
-          new Blockquote(),
           new CodeBlock(),
           new Image(),
           new CodeBlockHighlight({
@@ -192,7 +170,6 @@ export default {
           }),
           new ListItem(),
           new Bold(),
-          new Italic(),
           new InlineMath(),
           new HighlightText(),
           new History(),
@@ -237,7 +214,7 @@ export default {
 
     showImagePrompt(command) {
       this.$q.dialog({
-        sectionTitle: 'Enter the url of image',
+        title: 'Enter the url of image',
         class: 'dialog',
         color: 'positive',
         prompt: {
@@ -314,7 +291,6 @@ export default {
       caret-color: currentColor;
     }
 
-    blockquote,
     h1,
     ol,
     pre,
@@ -322,7 +298,6 @@ export default {
       margin-bottom: 0;
     }
 
-    blockquote:first-child,
     h1:first-child,
     ol:first-child,
     p:first-child,
@@ -331,7 +306,6 @@ export default {
       margin-top: 0;
     }
 
-    blockquote:last-child,
     h1:last-child,
     ol:last-child,
     p:last-child,
@@ -355,18 +329,119 @@ export default {
 
     img {
       display: inline-block;
-      margin: 10px 0 10px 0;
-      max-width: 400px;
-      max-height: 400px;
+      margin: 8px 0 8px;
+      max-width: 450px;
+      max-height: 450px;
       border-radius: 5px;
     }
 
     highlight {
       display: inline-block;
-      margin: 10px 0 10px 0;
+      margin: 8px 0 8px 0;
       padding: 0 2px 0 2px;
       background-color: $dark;
       color: $positive;
+    }
+
+    li > ol,
+    li > p,
+    li > ul {
+      margin: 0;
+    }
+
+    li > p {
+      display: inline;
+    }
+
+    ol, ul {
+      padding-left: 8px;
+      list-style: none;
+
+      li {
+        margin-bottom: 8px;
+      }
+
+      li:last-child {
+        margin-bottom: 8px;
+      }
+    }
+
+    ol {
+      counter-reset: item;
+
+      & > li::before {
+        counter-increment: item;
+        content: counter(item) ' )';
+        padding-right: 5px;
+        color: $positive;
+        font-weight: bold;
+      }
+    }
+
+    ul {
+      li::before {
+        content: '=>';
+        padding-right: 5px;
+        color: $positive;
+        font-weight: bold;
+      }
+
+      li:first-child {
+        margin-top: 3px;
+      }
+    }
+
+    table {
+      border-collapse: collapse;
+      table-layout: fixed;
+      align-items: center;
+      width: 100%;
+      margin: 0 auto;
+      overflow: hidden;
+
+      td, th {
+        min-width: 1em;
+        border: 2px solid $secondary;
+        padding: 3px 5px;
+        text-align: center;
+        box-sizing: border-box;
+        position: relative;
+        > * {
+          margin-bottom: 0;
+        }
+      }
+
+      th {
+        font-weight: bold;
+        background-color: #416C4C;
+      }
+
+      .selectedCell:after {
+        z-index: 2;
+        position: absolute;
+        content: "";
+        left: 0; right: 0; top: 0; bottom: 0;
+        background: rgba(179, 184, 188, 0.3);
+        pointer-events: none;
+      }
+
+      .column-resize-handle {
+        position: absolute;
+        right: -2px; top: 0; bottom: 0;
+        width: 4px;
+        z-index: 20;
+        pointer-events: none;
+      }
+    }
+
+    .tableWrapper {
+      max-width: 100%;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+
+    .resize-cursor {
+      cursor: col-resize;
     }
 
     pre {
@@ -454,110 +529,6 @@ export default {
         }
       }
     }
-
-    ol, ul {
-      padding-left: 8px;
-      list-style: none;
-
-      li {
-        margin-bottom: 8.5px;
-      }
-
-      li:last-child {
-        margin-bottom: 10px;
-      }
-    }
-
-    li > ol,
-    li > p,
-    li > ul {
-      margin: 0;
-    }
-
-    li > p {
-      display: inline;
-    }
-
-    ol {
-      counter-reset: item;
-
-      & > li::before {
-        counter-increment: item;
-        content: counter(item) ' )';
-        padding-right: 5px;
-        color: $positive;
-        font-weight: bold;
-      }
-    }
-
-    ul li::before {
-      content: '=>';
-      padding-right: 5px;
-      color: $positive;
-      font-weight: bold;
-    }
-
-    blockquote {
-      text-align: center;
-      margin: 0 auto;
-      padding: 0 5px;
-      background: transparent;
-      border: 2px dotted $positive;
-      max-width: 30vw;
-    }
-
-    table {
-      border-collapse: collapse;
-      table-layout: fixed;
-      align-items: center;
-      width: 100%;
-      margin: 0 auto;
-      overflow: hidden;
-
-      td, th {
-        min-width: 1em;
-        border: 2px solid $secondary;
-        padding: 3px 5px;
-        text-align: center;
-        box-sizing: border-box;
-        position: relative;
-        > * {
-          margin-bottom: 0;
-        }
-      }
-
-      th {
-        font-weight: bold;
-        background-color: #416C4C;
-      }
-
-      .selectedCell:after {
-        z-index: 2;
-        position: absolute;
-        content: "";
-        left: 0; right: 0; top: 0; bottom: 0;
-        background: rgba(179, 184, 188, 0.3);
-        pointer-events: none;
-      }
-
-      .column-resize-handle {
-        position: absolute;
-        right: -2px; top: 0; bottom: 0;
-        width: 4px;
-        z-index: 20;
-        pointer-events: none;
-      }
-    }
-
-    .tableWrapper {
-      max-width: 100%;
-      overflow-x: auto;
-      margin: 1em 0;
-    }
-
-    .resize-cursor {
-      cursor: col-resize;
-    }
   }
 }
 
@@ -565,27 +536,16 @@ export default {
   text-align: center;
   border-bottom: 2px solid $positive;
   margin-bottom: 15px;
-}
 
-.menubar__group {
-  display: inline-block;
-  border-right: 1px inset $positive;
-  margin: 0 5px 5px 0;
+  & > button[type="button"] {
+    margin-right: 3px;
+    color: $positive;
+    width: 36px;
+    height: 36px;
 
-  &:last-child {
-    border: none;
-    margin: 0;
+    &.is-active {
+      background-color: #515c54;
+    }
   }
-}
-
-.menubar__group > button[type="button"] {
-  margin-right: 3px;
-  color: $positive;
-  width: 36px;
-  height: 36px;
-}
-
-.menubar__group > button[type="button"].is-active {
-  background-color: #515c54;
 }
 </style>
