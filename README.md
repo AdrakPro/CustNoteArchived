@@ -1,26 +1,47 @@
-# CustNote (custnote)
+# custnote-electron
 
+> Older version of custnote based on Electron, Vue and RxDb
 
+## Run locally
 
-## Install the dependencies
+Clone the project
+
+```bash
+  git clone https://github.com/AdrakPro/custnote-electron.git
+```
+
+Go to the project directory
+
+```bash
+  cd custnote-electron
+```
+
+Install the dependencies
 ```bash
 yarn
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+Start the app in development mode (hot-code reloading, error reporting, etc.)
 ```bash
 quasar dev
 ```
 
-### Lint the files
+Lint the files
 ```bash
-yarn run lint
+yarn lint
 ```
 
-### Build the app for production
+Build the app for production
 ```bash
 quasar build
 ```
 
-### Customize the configuration
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
+## Feedback
+
+If you have any feedback, feel free to reach out adam.makarewicz14@gmail.com
+
+
+## License
+
+[MIT](LICENSE.md)
+
