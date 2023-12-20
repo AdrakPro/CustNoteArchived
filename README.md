@@ -1,4 +1,4 @@
-# custnote-electron
+# CustNote-Electron
 
 > Older version of custnote based on Electron, Vue and RxDb
 
